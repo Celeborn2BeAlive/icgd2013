@@ -1,0 +1,128 @@
+\documentclass[final,envcountsame]{llncs}
+
+
+%\usepackage{graphicx} %Pouvoir insérer des images
+\usepackage{epsfig}
+\usepackage{amsmath} %Permet d'utiliser une jolie panoplie de symboles mathématiques
+\usepackage{amssymb}
+%\usepackage{amsthm}
+\usepackage{stmaryrd}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsfonts}
+
+
+
+
+
+\def\mydef#1{{\em #1}}
+\def\myem#1{{\em #1}}
+\def\myvec#1{\vec{#1}}
+
+
+\def\Nset{\mathbb{N}}
+\def\Zset{\Z}
+\def\Rset{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\Zhalf{\frac{\mathbb{Z}}{2}}
+\def\allfaces#1{\mathbb{F}^{#1}}
+\def\subfaces#1#2{\allfaces{#1}_{#2}}
+\def\subcomplex#1#2{#1 \preceq #2}
+\def\complex#1#2{\subcomplex{#2}{\allfaces{#1}}}
+\def\cell#1{\hat{#1}}
+\def\cellstrict#1{\hat{#1}^*}
+\def\cont#1{\check{#1}}
+\def\contstrict#1{\check{#1}^*}
+\def\closure#1{#1^-}
+\def\princ#1{#1^+}
+\def\detach#1#2{#2 \oslash #1}
+\def\attach#1#2{\mbox{\it{}Attach\/}(\cell{#1},#2)}
+\def\mydim#1{\dim(#1)}
+\def\type#1{\mbox{\it{}Dir\/}(#1)}
+\def\orient#1{\mbox{\it{}Orient\/}(#1)}
+\def\border#1{\mbox{\it{}CBorder\/}(#1)}
+\def\suchthat{\;|\;}
+\def\inter{\cap}
+\def\union{\cup}
+\def\dinterval#1#2{\{#1,\ldots,#2\}}
+\newcommand{\Compl}[1]{\overline{#1}}
+\def\finproof{\square}
+\def\Zhalf{\frac{\mathbb{Z}}{2}}
+\newcommand{\Card}[1]{|#1|}
+
+\def\figpath#1{../../Images/EPS/#1}
+
+
+
+
+
+\begin{document}
+
+\section{Application to path tracing}
+
+\subsection{The path tracing algorithm}
+
+Path tracing is a global illumination algorithm that is able to render photo-realistic images of a scene viewed by a camera. The idea behind the algorithm is very simple: for each pixel of the image, throw rays of light through the pixel that will bounce on the scene to accumulate lighting exchanges. It is based on physical laws of radiometry.
+
+\subsubsection{Basic definitions of radiometry}
+
+Let $S$ be a set of surfaces of $\Rset^3$ that don't overlap ($\forall x \in \Rset^3$ there exists at most one surface of $S$ that contains $x$) and $S_L \subset S$ a set of surface lights. $S$ is called the scene.
+
+The basic radiometric quantity is the \myem{radiance} $L(x \rightarrow \Theta)$ that express the quantity of light energy produce by the surface point $x \in \Rset^3$ towards direction $\Theta \in \Omega_x$ per unit of time per unit area per unit solid angle (expressed in $W.m^{-2}.sr^{-1}$).
+This is the quantity that the eye actually "sees" and that must be computed. 
+
+% image radiance
+
+We can define another quantity related to radiance called \myem{incoming radiance} $L(x \leftarrow \Phi)$ that represents the radiance that reach $x$ from direction $\Phi$.
+
+\begin{property}
+
+The radiance remains constant along straight lines in the void.
+
+\end{property}
+
+That property allows us to write the incoming radiance in terms of radiance.
+
+\begin{equation*}
+L(x \leftarrow \Phi) = L(r(x, \Phi) \rightarrow -\Phi)
+\end{equation*}
+
+$r(x, \Phi)$ is the surface point seen by $x$ in the direction $\Phi$. It can be defined formally by:
+
+\begin{align*}
+r(x, \Phi) &= x + t_{min}\Phi \\
+t_{min} &= min \lbrace t \in (0, +\infty]~ |~ x + t\Phi \in S \rbrace
+\end{align*}
+
+If $t_{min} = \infty$ then $r(x, \Phi)$ is undefined and $L(x \leftarrow \Phi) = 0$. We call $r$ the \myem{raytrace} function. In practice it is implemented by throwing a ray in the scene and looking for the first intersection.
+
+A third quantity related to radiance is \myem{emitted radiance} $L_e(x \rightarrow \Theta)$. It is not null if $x$ is a point of a light source ($x \in S_L$). In practice the emitted radiance is given with the set $S_L$ as an input of the algorithm (in can be constant across each of the lights or given by a texture).
+
+The radiance is the solution of an equation called the Rendering Equation:
+
+\begin{equation}
+L(x \rightarrow \Theta) = L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(x \leftarrow \Phi) cos(N_x, \Phi) d\omega_\Phi
+\end{equation}
+
+It's actually this equation that a path tracer try to resolve. Let $O$ be the origine of the camera and $I$ the image we want to compute (a rectangle embedded in $\Rset^3$). Then the path tracing algorithm compute an approximation of the radiances $L(O \leftarrow \vec{OP})$, $\forall P \in I$.
+
+\subsubsection{Solving the rendering equation}
+
+Parler rapidement de l'échantillonage et donner l'estimateur de monte carlo
+
+\subsubsection{The algorithm}
+
+Donner l'algorithme en pseudo-code
+
+\subsection{Skeleton based importance sampling}
+
+Décrire la stratégie d'échantillonage basée sur le squelette
+
+\subsection{Multiple importance sampling}
+
+Décrire comment combiner les stratégies brdf + skeleton
+
+\subsection{Coarse irradiance estimation using curvilinear skeleton}
+
+Décrire les heuristiques
+
+\end{document}

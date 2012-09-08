@@ -1,61 +1,4 @@
-\documentclass[final,envcountsame]{llncs}
 
-
-%\usepackage{graphicx} %Pouvoir insérer des images
-\usepackage{epsfig}
-\usepackage{amsmath} %Permet d'utiliser une jolie panoplie de symboles mathématiques
-\usepackage{amssymb}
-%\usepackage{amsthm}
-\usepackage{stmaryrd}
-\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
-\usepackage{amsfonts}
-
-
-
-
-
-\def\mydef#1{{\em #1}}
-\def\myem#1{{\em #1}}
-\def\myvec#1{\vec{#1}}
-
-
-\def\Nset{\mathbb{N}}
-\def\Zset{\Z}
-\def\Rset{\mathbb{R}}
-\def\Z{\mathbb{Z}}
-\def\Zhalf{\frac{\mathbb{Z}}{2}}
-\def\allfaces#1{\mathbb{F}^{#1}}
-\def\subfaces#1#2{\allfaces{#1}_{#2}}
-\def\subcomplex#1#2{#1 \preceq #2}
-\def\complex#1#2{\subcomplex{#2}{\allfaces{#1}}}
-\def\cell#1{\hat{#1}}
-\def\cellstrict#1{\hat{#1}^*}
-\def\cont#1{\check{#1}}
-\def\contstrict#1{\check{#1}^*}
-\def\closure#1{#1^-}
-\def\princ#1{#1^+}
-\def\detach#1#2{#2 \oslash #1}
-\def\attach#1#2{\mbox{\it{}Attach\/}(\cell{#1},#2)}
-\def\mydim#1{\dim(#1)}
-\def\type#1{\mbox{\it{}Dir\/}(#1)}
-\def\orient#1{\mbox{\it{}Orient\/}(#1)}
-\def\border#1{\mbox{\it{}CBorder\/}(#1)}
-\def\suchthat{\;|\;}
-\def\inter{\cap}
-\def\union{\cup}
-\def\dinterval#1#2{\{#1,\ldots,#2\}}
-\newcommand{\Compl}[1]{\overline{#1}}
-\def\finproof{\square}
-\def\Zhalf{\frac{\mathbb{Z}}{2}}
-\newcommand{\Card}[1]{|#1|}
-
-\def\figpath#1{../../Images/EPS/#1}
-
-
-
-
-
-\begin{document}
 
 \section{Application to path tracing}
 
@@ -125,4 +68,3 @@ Décrire comment combiner les stratégies brdf + skeleton
 
 Décrire les heuristiques
 
-\end{document}

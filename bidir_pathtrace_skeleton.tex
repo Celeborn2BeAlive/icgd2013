@@ -17,7 +17,7 @@
 \newcommand{\centerness}{Decenter}
 
 \def\OneBall#1{\mathbb{B}^{1}_{#1}}
-\def\MaxOneBall#1{\hat{\OneBall{#1}}}
+\def\MaxOneBall#1{\mathbb{M}\OneBall{#1}}
 
 \def\dd{\omega}
 \def\DD{\Omega}
@@ -254,21 +254,21 @@ Let $\complex{n}{X}$, the result of $ParDirCollapse(X,\emptyset,+\infty)$ is a t
 
 \section{Aspect preservation during thinning: a parameter-free method}
 \label{sec::aspect_no_param}
-Algorithm \ref{algo::pardircollapse_v0} does not necessarily preserves "geometrical information" of the original object in the resulting skeleton. For example, if the input was a filled human shape (one connected component, no tunnel nor cavity) and that $W=\emptyset$ and $l=+\inf$, then the result of Alg.~\ref{algo::pardircollapse_v0} would be a simple vertex. However, when one wants to preserve "geometrical information" from the original shape in the skeleton, then one expects to obtain a "stickman" from a human shape. However, it is important to not retain "too much information" during thinning in order to avoid noisy branches in the skeleton.
+Algorithm \ref{algo::pardircollapse_v0} does not necessarily preserves "geometrical information" from the original object in the resulting skeleton. For example, if the input was a filled human shape (one connected component, no tunnel nor cavity) and that $W=\emptyset$ and $l=+\inf$, then the result of Alg.~\ref{algo::pardircollapse_v0} would be a simple vertex. However, when one wants to preserve "geometrical information" from the original shape in the skeleton, then one expects to obtain a "stickman" from a human shape. However, it is important to not retain "too much information" during thinning in order to avoid noisy branches in the skeleton.
 
-In the following, we will see a new method in the cubical complex, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory visual properties. This will be achieved by adding, in the set $W$ of Alg.~\ref{algo::pardircollapse_v0} some faces of the original object.
+In the following, we will see a new method in the cubical complex, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory visual properties. This will be achieved by adding, in the set $W$ of Alg.~\ref{algo::pardircollapse_v0}, some faces from the original object during the thinning process.
 
 \subsection{The lifespan of a face}
-In the following, we define new notions in the cubical complex. The first one we present is the \myem{death date} of a face.
+In the following, we define more notions in the cubical complex. The first one we present is the \myem{death date} of a face.
 
 \begin{definition}
 Let $f \in \complex{n}{X}$, the \myem{death date of $f$ in $X$}, denoted by $\death{f}{X}$, is the smallest integer $d$ such that $f \notin ParDirCollapse(X, \emptyset, d)$. 
 \end{definition}
 
-The death date of a face indicates how many layers of free faces should be removed from a complex $X$, using alg.~\ref{algo::pardircollapse_v0}, before removing completely the face from $X$. We now define the \myem{birth date} of a face:
+The death date of a face indicates how many layers of free faces should be removed from a complex $X$, using Alg.~\ref{algo::pardircollapse_v0}, before removing completely the face from $X$. We now define the \myem{birth date} of a face:
 
 \begin{definition}
-Let $f \in \complex{n}{X}$, the \myem{birth date of $f$ in $X$}, denoted by $\birth{f}{X}$, is the minimum between the smallest integer $b$ such that $f$ is a facet of $ParDirCollapse(X, \emptyset, b)$, and $\death{f}{X}$. 
+Let $f \in \complex{n}{X}$, the \myem{birth date of $f$ in $X$}, denoted by $\birth{f}{X}$, is the smallest integer $b$ such that either $f$ is a facet of $ParDirCollapse(X, \emptyset, b)$, or either $f \notin ParDirCollapse(X, \emptyset, b)$.
 \end{definition}
 
 The birth date indicates how many layers of free faces must be removed from $X$ with Alg.\ref{algo::pardircollapse_v0} before transforming $f$ into a facet of $X$ (we consider a face "lives" when it is a facet).
@@ -289,118 +289,55 @@ Let $f \in \complex{n}{X}$, the lifespan of $f$ in $X$ is the integer
 
 The three parameters previously defined are dependant on the order of direction and orientation chosen for algorithm $ParDirCollapse$.
 
-The lifespan of a face $f$ of $X$ indicates how many "rounds" this face "survives" as a facet in $X$, when removing free faces with algorithm \ref{algo::pardircollapse_v0}. The lifespan, the death and the birth, as defined here, are dependant of Alg.~\ref{algo::pardircollapse_v0}, used for performing the thinning. It is of course possible to use another algorithm for performing the thinning, leading to other values of birth, death and lifespan. It is recommended, in order to have "comparable" values, to compute these three parameters with the same thinning technique.
+The lifespan of a face $f$ of $X$ indicates how many "rounds" this face "survives" as a facet in $X$, when removing free faces with Alg.~\ref{algo::pardircollapse_v0}. 
 
-Algorithm \ref{algo::lifespan} computes the lifespan of all faces of a complex. The algorithm is not linear in time, however, a linear implementation of such algorithm exists and is presented in the appendix. On Fig.~\ref{fig:lifespan_exemple}, we show a sequence of collapse allowing to compute the lifespan of an edge.
-%Todo lien avec annexe
-
-
-\begin{algorithm}[h!]
-\label{algo::lifespan}
-\caption[Lifespan]{$Lifespan(X)$}
-\SetKwFor{ForAll}{for all}{do}{end}
-\KwData{A cubical complex $\complex{n}{X}$}
-\KwResult{The map giving the lifespan of all faces of $X$}
-\ForAll{$f \in X$}{
-  $Death(f)=+\infty$\;
-  \If{$f \in \princ{X}$}{
-    $Birth(f)=0$\;
-  }
-  \Else{
-    $Birth(f)=+\infty$\;
-  }
-}
-$Y=X; l=0$\;
-\While{there exists free faces for $Y$}{
-  $Y=ParDirCollapse(Y,\emptyset,1)$\;
-  $l=l+1$\;
-  \ForAll{$f \in \princ{Y}$ such that $Birth(f)=+\infty$}{
-  	$Birth(f)=l$\;
-  }
-  \ForAll{$f \notin Y$ such that $Death(f)=+\infty$ and $f \in X$}{
-  	$Death(f)=l$\;
-  }
-}
-\ForAll{$f \in X$}{
-  $Birth(f)=\min(Birth(f), Death(f))$\;
-  \If{$Death(f)=+\infty$}{
-    $Lifespan(f)=+\infty$\;
-  }
-  \Else{
-    $Lifespan(f)=Death(f) - Birth(f)$\;
-  }
-}
-\Return $Lifespan$\;
-\end{algorithm}
-
-The lifespan is a good indicator of how important a face can be in an object. Typically, higher the lifespan is, and more representative of an object's visual feature the face is. The lifespan, also called \myem{saliency}, was used in \cite{Liu2009} (under the name "medial persistence") in order to propose a thinning algorithm in cubical complexes based on two parameters.
+The lifespan is a good indicator of how important a face can be in an object. Typically, higher the lifespan is, and more representative of an object's visual feature the face is. The lifespan, sometimes called \myem{saliency}, was used in \cite{Liu2009} (with the name "medial persistence") in order to propose a thinning algorithm in cubical complexes based on two parameters.
 
 
 \subsection{Distance map and opening function}
 \label{subsec::distmap}
-In addition to the lifespan of a face, the proposed homotopic thinning method will use information on distance between faces in order to decide if a face should be kept safe from deletion. We define hereafter the various notions needed for this, based on distance in the DT framework.
+In addition to the lifespan of a face, the proposed homotopic thinning method uses information on distance between faces in order to decide if a face should be kept safe from deletion. We define hereafter the various notions needed for this, based on distance in the voxel framework.
 
-Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal or inferior to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. 
+Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal or inferior to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. Remark that $d_1$ is indeed the $6$-distance in the 3d voxel framework.
 
-We set $d_1(x,y)$ as the length of the shortest $1$-path from $x$ to $y$. Let $S \subset \Zset^n$, we set $d_1(x,S) = \displaystyle \min_{y \in S} d_1(x,y)$. The \myem{$1$-ball of radius $r$ centered on $x$} is the set $\OneBall{r}(x)=\{y \in \Zset^n | d_1(x,y) < r\}$. Remark that $d_1$ is indeed the so-called $4$-distance in the 2d DT framework, and the $6$-distance in the 3d DT framework.
+We set $d_1(x,y)$ as the length of the shortest $1$-path from $x$ to $y$. Let $S \subset \Zset^n$, we set $d_1(x,S) = \displaystyle \min_{y \in S} d_1(x,y)$. The \myem{$1$-ball of radius $r$ centered on $x$} is the set $\OneBall{r}(x)=\{y \in \Zset^n | d_1(x,y) < r\}$. 
 Given $X \subset \Zset^n$, the \myem{maximal $1$-ball of $X$ centered on $x$} is the set $\MaxOneBall{X}(x) = \OneBall{d_1(x,\Compl{X})}(x)$. 
 
-We set, for all $x \in X$, $\dd_1(x,\Compl{X}) = \displaystyle \max_{x \in \MaxOneBall{X}(y)} d_1(y,\Compl{X})$: this value indicates the radius of the largest maximal $1$-ball contained in $X$ and containing $x$. If $x \in \Compl{X}$, we set $\dd_1(x,\Compl{X}) = 0$. The map $\dd_1$ is known as the opening function (based on the $1$-distance): it allows to compute efficiently results of openings by balls of various radius, and gives information on the local thickness of an object on each of its points. We show some examples of the opening function on Fig.~\ref{fig::globalopening} and \ref{fig::detailopening}.
+We set, for all $x \in X$, $\dd_1(x,\Compl{X}) = \displaystyle \max_{x \in \MaxOneBall{X}(y)} d_1(y,\Compl{X})$: this value indicates the radius of the largest maximal $1$-ball contained in $X$ and containing $x$. If $x \in \Compl{X}$, we set $\dd_1(x,\Compl{X}) = 0$. The map $\dd_1$ is known as the opening function (based on the $1$-distance): it allows to compute efficiently results of morphological openings by balls of various radius, and gives information on the local thickness of an object.
 
-Given $\complex{n}{X}$, the value of $\dd_1(x,\Compl{X})$ of every $x \in X$ can be computed by performing successive dilations of values of the map $d_1$. The algorithm presented in Alg.\ref{algo::naive_opening} is naive, and a more efficient implementation (linear in time depending on the image's size) is discussed in the appendix (see Sec.~\ref{sec::better_open}, p.~\pageref{sec::better_open}).
+Given $X \subset \Zset^n$, the value of $\dd_1(x,\Compl{X})$ of every $x \in X$ can be naively computed by performing successive morphological dilations of values of the map $d_1$. 
+%TODO Parler du fait que l'on a une version dans la thèse, et une version plus amélioré dans thèse et public avenir
 
-In order to extend $d_1$ and $\dd_1$ to the cubical complex framework, let us introduce the map $\Phi^{-1}$, inverse of the bijective map $\Phi$ defined in Sec.~\ref{sec::binary_to_cubic}. It is used to project any $n$-face of $\allfaces{n}$ into $\Zset^n$. We indifferently use $\Phi^{-1}$ as a map from $\subfaces{n}{n}$ to $\Zset^n$, and as a map from $\mathcal{P}(\subfaces{n}{n})$ to $\mathcal{P}(\Zset^n)$.
+In order to extend $d_1$ and $\dd_1$ to the cubical complex framework, let us introduce the map $\Phi^{-1}$, inverse of the bijective map $\Phi : \subfaces{n}{n} \rightarrow \Zset^{n}$ defined in Sec.~\ref{sec::binary_to_cubic}. It is used to project any $n$-face of $\allfaces{n}$ into $\Zset^n$. We indifferently use $\Phi^{-1}$ as a map from $\subfaces{n}{n}$ to $\Zset^n$, and as a map from $\mathcal{P}(\subfaces{n}{n})$ to $\mathcal{P}(\Zset^n)$.
 
-Given $\complex{n}{X}$, we set $X^v = \Phi^{-1}(X \inter \subfaces{n}{n})$: the set $X^v$ is a subset of $\Zset^n$. We define the map $\tilde{D_1}(X): \allfaces{n} \rightarrow \Nset$ as an extension of $d_1$ to the cubical complex framework: for all $f \in \allfaces{n}$,
+Given $Y \subset \allfaces{n}$, we define the map $\tilde{D_1}(X): \allfaces{n} \rightarrow \Nset$ as an extension of $d_1$ to the cubical complex framework: for all $f \in \allfaces{n}$,
 
 \bigskip
 \begin{math}
-\tilde{D_1}(X)(f) = \left\{
+\tilde{D_1}(Y)(f) = \left\{
 \begin{array}{ll}
-d_1(\Phi^{-1}(f),\Compl{X^v}) & \text{if $f$ is an $n$-face}\\
-\displaystyle \max_{g \in \contstrict{f}} \tilde{D_1}(X)(g) & \text{else}
+d_1(\Phi^{-1}(f),\Phi^{-1}(Y \inter \subfaces{n}{n})) & \text{if $f$ is an $n$-face}\\
+\displaystyle \max_{g \in \contstrict{f} \inter \subfaces{n}{n}} \tilde{D_1}(Y)(g) & \text{else}
 \end{array}
 \right.
 \end{math}
 
-The same way, we define $\tilde{\DD_1}(X): \allfaces{n} \rightarrow \Nset$ as an extension of $\dd_1$ to the cubical complex framework.
+Informally, if $f$ is a 3-face, then $\tilde{D_1}(Y)(f)$ is the length of the shortest 1-path between the voxel \quotes{corresponding} to $f$ and the set of voxels corresponding to $Y$.
+The same way, we define $\tilde{\DD_1}(Y): \allfaces{n} \rightarrow \Nset$ as an extension of $\dd_1$ to the cubical complex framework.
+
+Finally, we define the decenterness map:
+
+\begin{definition}
+The \myem{decenterness map}, denoted by $\centerness(Y)$, is equal to $\tilde{\DD_1}(Y) - \tilde{D_1}(Y)$.
+\end{definition}
 
 \subsection{Parameter-free thinning based on the lifespan, opening function and decenterness}
-Thanks to these notions, we can now define sets of faces that will help preserve the visual aspect of an object during thinning. First, let us define the decenterness of a complex as the map $\centerness(X) = \tilde{\DD_1}(X) - \tilde{D_1}(X)$. For each face of a complex $X$, the decenterness value of this face gives an information on how well a face is centered inside a visual feature of the object: the lower this value is, the better centered the face is. On Fig.~\ref{fig::globalopening}, we give an example of the decenterness map of a shape, where the highest values are represented by the darkest colours.
+As previously said, we will add edges to the set $W$ of Alg.~\ref{algo::pardircollapse_v0} in order to retain, in the resulting curvilinear skeleton, important edges from the original object. If an edge has a high decenterness value, then it is probably located too close to the object's border and does not represent an interesting visual feature to preserve.
+%TODO ref vers image de decenterness
+On the other hand, if an edge has a high lifespan, then it means it was not removed quickly, after becoming a cell, by the thinning algorithm and might represent some precious visual information on the original object. An idea would be to keep, during thinning, all edges whose lifespan is superior to the decenterness value. Unfortunately, this strategy produces skeletons with many spurious branches in surfacic areas of the original object.
 
-Faces relevant of the visual aspect of a complex must have a high lifespan ("survive" long to the homotopic thinning process) and a low decenterness (is centered in the object). In a $3$-dimensional complex (resp. a $2$-dimensional complex), squares (resp. lines) whose lifespan is higher than the decenterness will be chosen as relevant of the surfacic (resp. curvilinear) parts of the complex.
+We can identify surfacic areas of a complex as zones where squares have a high lifespan. Therefore, in order to avoid spurious branches in surfacic areas, we need to make it harder for edges to appear in these zones. It can be achieved by deciding that an edge will be kept safe from deletion by the thinning algorithm if its lifespan is superior to the decenterness value plus the lifespan of squares \quotes{around} this edge. This leads us to 
 
-\begin{definition}
-Given $\complex{n}{X}$, the \myem{$k$-LC axis} (stands for "Lifespan Centerness") of $X$ is the set 
-
-\begin{center}
-$\axislc{k}(X) = \closure{\{f \in X$ $|$ $\dim(f)=k$ and $\lifespan{f}{X} > \centerness(X)(f)\}}$.
-\end{center}
-
-\end{definition}
-
-The LC-axis fails in selecting a good set of curves relevant of the curvilinear parts of a three-dimensional complex. Indeed, given a $3$-complex $X$, the set $\axislc{1}(X)$ contains generally too many curves. This happens because the algorithm $ParDirCollapse$ "takes more time" to eliminate lines than to eliminate squares in a $3$-complex. Consequently, lines of a $3$-complex tend to have a high lifespan even though they are not representative of any curvilinear part of the complex. The thicker is the input object, and the more important is the phenomenon. 
-
-Lines relevant of the curvilinear parts of a $3$-complex have a high lifespan and a low decenterness, especially in the thick parts of the complex. Lines whose lifespan is higher than the decenterness added to the local thickness of the complex will be relevant of the curvilinear parts of the complex.
-
-\begin{definition}
-Given $\complex{n}{X}$, the \myem{$k$-LOC axis} (stands for "Lifespan Opening Centerness") of $X$ is the set 
-
-\begin{center}
-$\axisloc{k}(X) = \closure{\{f \in X$ $|$ $\dim(f)=k$ and $\lifespan{f}{X} > \tilde{\DD_1}(X)(f) + \centerness(X)(f)\}}$.
-\end{center}
-\end{definition}
-
-
-The various sets previously defined represent faces which should be kept safe from deletion during homotopic thinning of a complex in order to obtain a pruned skeleton containing visual features from the original object. The set $\axislc{1}$ of a $2$-complex represents curvilinear parts to keep in this complex, the set $\axisloc{1}$ of a $3$-complex represents curvilinear parts to keep in this complex, and the set $\axislc{2}$ of a $3$-complex represents surfacic parts to keep in this complex.
-
-\begin{lemma}
-\label{lem::axis_subset_facet}
-Given $\complex{n}{X}$, for every $k<n$, $\axislc{k}(X) \subseteq CollapseFacet(X, \emptyset)$ and $\axisloc{k}(X) \subseteq CollapseFacet(X, \emptyset)$.
-\end{lemma}
-
-Lemma \ref{lem::axis_subset_facet} is straightforward once observed that $CollapseFacet(X, \emptyset)$ is indeed the set of $k$-faces of $X$ ($k<n$) which have a strictly positive lifespan in $X$. 
-Based on these sets, we propose three algorithms: one for computing a 1d skeleton from a bi-dimensional complex, one for computing a 2d skeleton (which can contain 1d parts) from a three-dimensional complex, and one for computing a curvilinear skeletons from a three-dimensional complex. This last algorithm should produce one-dimensional results (a set of lines) however, the output can be a two-dimensional complex.
 
 \begin{algorithm}[ht]
 \label{algo::3d_input_curv_skel}
@@ -413,9 +350,6 @@ $ParDirCollapse(X,W,+\infty)$\;
 \Return $X$\;
 \end{algorithm}
 
-Algorithm \ref{algo::3d_input_curv_skel} produces as output a 2d or 1d complex, result of the homotopic thinning of a three-dimensional complex. The skeleton produced by this algorithm should be a set of lines describing the shape of the input, however, it may contain squares representative of the topology of the initial object (if the input complex contains a cavity, the skeleton will contain surfacic parts).
-
-Despite the use of constraint sets (sets of faces which should not be removed during thinning) in the three algorithms, they produce thin results. -> On peut simplement modifier algo pour y incorporer directement les elements a conserver pdt la skel...
 
 
 

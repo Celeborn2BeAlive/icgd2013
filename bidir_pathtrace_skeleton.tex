@@ -52,7 +52,7 @@
 \def\mydim#1{\dim(#1)}
 \def\type#1{\mbox{\it{}Dir\/}(#1)}
 \def\orient#1{\mbox{\it{}Orient\/}(#1)}
-\def\border#1{\mbox{\it{}CBorder\/}(#1)}
+\def\border#1{\mbox{\it{}Border\/}(#1)}
 \def\suchthat{\;|\;}
 \def\inter{\cap}
 \def\union{\cup}
@@ -169,15 +169,15 @@ In conclusion, in $\allfaces{3}$, as long as a complex still contains $3$-faces,
 \section{A parallel directional thinning based on cubical complex}
 
 \subsection{Removing free pairs in parallel}
-In the cubical complex framework, parallel removal of simple pairs can be easily achieved when following simple rules that we will give now. First, we need to define the \myem{direction} and the \myem{orientation} of a free face.
+In the cubical complex framework, parallel removal of simple pairs can be easily achieved when following simple rules that we give now. First, we need to define the \myem{direction} and the \myem{orientation} of a free face.
 
 Let  $f \in \allfaces{n}$, the \myem{center of $f$} is the center of mass of the points in $f$, that is, $c_f= \frac{1}{\Card{f}}\sum_{a \in f}{a}$. The center of $f$ is an element of $[\Zhalf]^n$, where $\Zhalf$ denotes the set of half integers.
 Let $\complex{n}{X}$, let $(f,g)$ be a free pair for $X$, and let $c_f$ and $c_g$ be the respective centers of the faces $f$ and $g$. We denote by $V(f,g)$ the vector $(c_f -c_g)$ of $[\Zhalf]^n$. 
 
 We define a surjective function $\type{}: \allfaces{n} \times \allfaces{n} \rightarrow \dinterval{0}{n-1}$ such that, for all free pairs $(f,g)$ and $(i,j)$ for $X$, $\type{f,g} = \type{i,j}$ if and only if $V(f,g)$ and $V(i,j)$ are collinear (we don't bother defining $\type{}$ for non free pairs as it won't be useful in this case). The number $\type{f,g}$ is called the \myem{direction} of the free pair $(f,g)$. Let $(f,g)$ be a free pair, the vector $V(f,g)$ has only one non-null coordinate: the pair $(f,g)$ has a \myem{positive orientation}, and we write $\orient{f,g}=1$, if the non-null coordinate of $V(f,g)$ is positive; otherwise $(f,g)$ has a \myem{negative orientation}, and we write $\orient{f,g}=0$.
-On Fig.~\ref{fig:parallel_collapse}, the free pair $(a,c)$ and the free pair $(d,e)$ have different directions; the free pairs $(a,b)$ and $(d,e)$ have the same direction, but opposite orientations.
+%On Fig.~\ref{fig:parallel_collapse}, the free pair $(a,c)$ and the free pair $(d,e)$ have different directions; the free pairs $(a,b)$ and $(d,e)$ have the same direction, but opposite orientations.
 
-Now, we give a property of collapse which brings a necessary and sufficient condition for removing two free pairs of faces in parallel from a complex, while preserving topology (see Fig.~\ref{fig:parallel_collapse}c).
+Now, we give a property of collapse which brings a necessary and sufficient condition for removing two free pairs of faces in parallel from a complex, while preserving topology.
 
 \begin{proposition}
 \label{prop:collpar2}
@@ -207,7 +207,10 @@ Let $\complex{n}{X}$, and let $(f_1,g_1) \ldots (f_m,g_m)$ be $m$ distinct free 
 
 \subsection{A directional parallel thinning algorithm}
 
-We say that a $d$-face of $X$ is a \myem{border face} if it contains a free $(d-1)$-face. Define $\border{X}$ as the set of all border faces of $X$. We are now ready to introduce a directional parallel thinning algorithm (Alg.~\ref{algo::pardircollapse_v0}).
+Intuitively, we want the algorithm to remove free faces of a complex \quotes{layer by layer}: we don't want to have unequal thinning of the input complex. Therefore, we want each execution of the algorithm to remove free faces located on the border of the input complex. 
+We say that a $d$-face of $X$ is a \myem{border face} if it contains a free $(d-1)$-face. We define $\border{X}$ as the set of all border faces of $X$. We now  introduce a directional parallel thinning algorithm (Alg.~\ref{algo::pardircollapse_v0}).
+
+On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, only faces located on the border of the complex are removed (l.~\ref{pc:07}). Thanks to corollary \ref{cor:parallel_removal_v2}, we also remove faces with same direction and orientation in parallel (l.~\ref{pc::08}).
 
 \begin{algorithm}[h!]
 \label{algo::pardircollapse_v0}
@@ -235,11 +238,17 @@ We say that a $d$-face of $X$ is a \myem{border face} if it contains a free $(d-
 \lnl{pc:10} \Return $X$\;
 \end{algorithm}
 
-Intuitively, we want the algorithm to remove free faces \quotes{layer by layer}: we don't want, after a single execution ($\ell =1$), to have unequal thinning of the input complex. Therefore, we want each execution of the algorithm to remove free faces located on the border of the input complex: this is why we introduce, on line \ref{pc:02} the set $L$, and that we remove only faces located in $L$ on line \ref{pc:08}. The sets $E$ (line \ref{pc:06}) and $G$ (line \ref{pc:07}) allows to remove whole sets of free faces in parallel from $X$, thanks to the direction and orientation of faces previously defined. A detailed view of each step of the algorithm is shown on Fig.~\ref{fig:step_thinning}.
 
-Different definitions of the orientation and direction can be given, corresponding to different order of removal of free faces in the complex. These changes lead to different results, but arbitrary choices on the order of removal of free pairs must be made in order to obtain, at the end, a thin skeleton (no more $n$-faces when working in the $n$-dimension). Once orientation and direction have been defined, the results of the algorithm are uniquely defined.
 
-Algorithm~\ref{algo::pardircollapse_v0} may be easily implemented to run in linear time complexity (proportionally to the number of faces of the complex). Indeed, checking if a face is free or not may be easily done in constant time. Moreover, when a free pair $(f,g)$ is removed from the input complex, it is sufficient to scan the faces of $f$ and the cofaces of $g$ in order to find new free faces, as other faces' status won't change (the implemented algorithm contains these optimizations).
+Different definitions of the orientation and direction can be given, corresponding to different order of removal of free faces in the complex and leading to different results.
+Algorithm~\ref{algo::pardircollapse_v0} may be easily implemented to run in linear time complexity (proportionally to the number of faces of the complex). Indeed, checking if a face is free or not may be easily done in constant time. Moreover, when a free pair $(f,g)$ is removed from the input complex, it is sufficient to scan the elements of $\cellstrict{f} \union \contstrict{g}$ in order to find new free faces, as other faces' status won't change.
+
+The following property is a direct consequence of of Prop.~\ref{prop:thinness} and the fact that Alg.~\ref{algo::pardircollapse_v0} stops when no more free faces can be found in the complex :
+
+\begin{proposition}
+\label{prop::alg_v0_thin}
+Let $\complex{n}{X}$, the result of $ParDirCollapse(X,\emptyset,+\infty)$ is a thin complex.
+\end{proposition}
 
 
 

@@ -42,15 +42,47 @@ A third quantity related to radiance is \myem{emitted radiance} $L_e(x \rightarr
 
 The radiance is the solution of an equation called the Rendering Equation:
 
-\begin{equation}
-L(x \rightarrow \Theta) = L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(x \leftarrow \Phi) cos(N_x, \Phi) d\omega_\Phi
-\end{equation}
+\begin{align*}
+L(x \rightarrow \Theta) &= L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(x \leftarrow \Phi) cos(N_x, \Phi) d\omega_\Phi \\
+&= L_e(x \rightarrow \Theta) + L_r(x \rightarrow \Theta)
+\end{align*}
 
-It's actually this equation that a path tracer try to resolve. Let $O$ be the origine of the camera and $I$ the image we want to compute (a rectangle embedded in $\Rset^3$). Then the path tracing algorithm compute an approximation of the radiances $L(O \leftarrow \vec{OP})$, $\forall P \in I$.
+This equation express an intuitive idea: the radiance produced by the point $x$ in the direction $\Theta$ is the sum of the emitted radiance and the reflected radiance. 
+
+The reflected radiance is computed by taking all the possible directions of the hemisphere around $x$ and integrate the incoming radiance along those directions scaled by a factor $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$. 
+
+The cosine is used to attenuate the radiance that arrive by a "direction rasante". 
+
+The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. It has to respect three properties to be physically coherent:
+
+\begin{itemize}
+\item Helmotz reciprocity: $f_r(x, \Theta \leftrightarrow \Phi) = f_r(x, \Phi \leftrightarrow \Theta)$
+\item Positivity: $f_r(x, \Theta \leftrightarrow \Phi) \geq 0$
+\item Conservation of energy: $\int_{\Omega_x} f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi) d\omega_\Phi \leq 1$
+\end{itemize}
+
+It's actually the rendering equation that a path tracer try to resolve. Let $O$ be the origin of the camera and $I$ the image we want to compute (a rectangle embedded in $\Rset^3$). Then the path tracing algorithm compute an approximation of the radiances $L(O \leftarrow \vec{OP})$, $\forall P \in I$.
 
 \subsubsection{Solving the rendering equation}
 
-Parler rapidement de l'échantillonage et donner l'estimateur de monte carlo
+The rendering equation is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
+
+\begin{align*}
+L(x \rightarrow \Theta) &= L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(x \leftarrow \Phi) cos(N_x, \Phi) d\omega_\Phi \\
+&= L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) cos(N_x, \Phi) d\omega_\Phi
+\end{align*}
+
+In practive it is impossible to compute anatically the integral, it has to be estimated. The most commonly used method is the Monte-Carlo integration that provide the following estimator for the integral:
+
+\begin{equation*}
+\langle L_r(x \rightarrow \Theta) \rangle = \frac{1}{N} \sum_{i = 1}^{N} \frac{f_r(x, \Theta \leftrightarrow \Phi_i) L(r(x, \Phi_i) \rightarrow -\Phi_i) cos(N_x, \Phi_i)}{p(\Phi_i)}
+\end{equation*}
+
+$p$ is a probability density function that is used to sample $N$ samples $(\Phi_i)_{i = 1...N}$ of the hemisphere $\Omega_x$.
+
+This estimator is unbiased, it means that the esperance $E[\langle L_r(x \rightarrow \Theta) \rangle]$ is equal to $L_r(x \rightarrow \Theta)$. 
+
+% parler de la variance
 
 \subsubsection{The algorithm}
 
@@ -63,8 +95,3 @@ Décrire la stratégie d'échantillonage basée sur le squelette
 \subsection{Multiple importance sampling}
 
 Décrire comment combiner les stratégies brdf + skeleton
-
-\subsection{Coarse irradiance estimation using curvilinear skeleton}
-
-Décrire les heuristiques
-

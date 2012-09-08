@@ -78,11 +78,19 @@ In practive it is impossible to compute anatically the integral, it has to be es
 \langle L_r(x \rightarrow \Theta) \rangle = \frac{1}{N} \sum_{i = 1}^{N} \frac{f_r(x, \Theta \leftrightarrow \Phi_i) L(r(x, \Phi_i) \rightarrow -\Phi_i) cos(N_x, \Phi_i)}{p(\Phi_i)}
 \end{equation*}
 
-$p$ is a probability density function that is used to sample $N$ samples $(\Phi_i)_{i = 1...N}$ of the hemisphere $\Omega_x$.
+$p$ is a probability density function (pdf) that is used to sample $N$ samples $(\Phi_i)_{i = 1...N}$ of the hemisphere $\Omega_x$.
 
 This estimator is unbiased, it means that the esperance $E[\langle L_r(x \rightarrow \Theta) \rangle]$ is equal to $L_r(x \rightarrow \Theta)$. 
 
-% parler de la variance
+The variance of the estimator express its quality. The lower the variance is, the better is the estimator. We have:
+
+\begin{equation*}
+\sigma^2[\langle L_r(x \rightarrow \Theta) \rangle] = \frac{1}{N} \int_{\Omega_x} (\frac{f(\Phi)}{p(\Phi)} - L_r(x \rightarrow \Theta))^2 d\omega_\Phi
+\end{equation*}
+
+Then if we increase the number of samples we decrease the variance and the estimator gives better results. Another way to decrease the variance is to choose a good pdf. Actually the best is to choose a pdf that match the shape of the function to integrate (ie. give high density to samples that have high values for the function and low density to samples that have low values).
+
+This str	ategy of choosing a good pdf is called \myem{importance sampling} and is over-used in global illumination to improve the convergence of the algorithms.
 
 \subsubsection{The algorithm}
 

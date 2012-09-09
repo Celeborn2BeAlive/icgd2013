@@ -148,7 +148,7 @@ The skeleton is computed in two steps:
 \item Skeletonization in the cubical complex framework
 \end{itemize}
 
-The voxelization is done with a software called \of Binvox \fg. It voxelizes the surfaces of the scene and we invert it to get the voxelization of the void. The voxelization is then converted to a cubical complex and we apply our algorithm to skeletonize it. We get a curvilinear skeleton that has the same topology than the void.
+The voxelization is done with a software called Binvox. It voxelizes the surfaces of the scene and we invert it to get the voxelization of the void. The voxelization is then converted to a cubical complex and we apply our algorithm to skeletonize it. We get a curvilinear skeleton that has the same topology than the void.
 
 The skeleton is represented by a graph of 3D positions with edges encoding the topology.
 
@@ -162,10 +162,81 @@ Let $n$ be a node of the skeleton and $V_n$ the set of visible nodes from $n$ al
 
 \subsubsection{Sampling according to $L$}
 
+Given a point $x$ and a direction $\Theta$ we want to compute $L(x \rightarrow \Theta)$ and then sample the hemisphere $\Omega_x$. We search for the nearest skeleton node $n$ and its importance point $imp_n$. We sample the hemisphere with a power-cosine pdf center on $\vec{ximp_n}$:
+
+\begin{equation*}
+p_{skel}(\Phi) = \frac{s + 1}{2\pi} cos^s \alpha
+\end{equation*}
+
+with $\alpha$ the angle between $\vec{ximp_n}$ and $\Phi$ and $s$ a parameter called skeleton strength.  The more $s$ is high, the more we sample close $\vec{ximp_n}$.
+
+\subsubsection{Results}
+
 \subsubsection{Problems}
+
+A few problems arise from this sampling strategy:
+
+\begin{itemize}
+\item $\vec{ximp_n}$ may point backward the surface (ie. $cos(\vec{ximp_n}, N_x) < 0$)
+\item The importance point $imp_n$ may be not visible from $x$
+\end{itemize}
+
+In those case we don't use the skeleton and switch to a basic BRDF sampling.
+
+Another problem from the method is the apparition of speckles. Speckles are anormally white pixels on the computed image that tend to vanish when we augment the number of rays thrown by pixel. It comes from the Monte-Carlo estimator when we sample a direction $\Phi$ with a low pdf $p(\Phi)$ but a high value $f_r(x, \Theta \leftrightarrow \Phi) L(x \leftarrow \Phi) cos(N_x, \Phi)$: the ratio becomes very high and speckles appears. In the next section we discuss a method to attenuate the speckles.
 
 \subsection{Skeleton based multiple importance sampling}
 
+Our strategy is good, especially in dark areas. It reduces noise by taking into account the distribution of energy in the scene. The problem is that we take into account only one importance direction for sampling, we totally ignore the BRDF and the cosine factor (unless we fall in a bad case like the two describe above). We implemented a solution called multiple importance sampling (MIS) that is able to combine multiple sampling strategies into one.
+
 \subsubsection{Multiple importance sampling}
 
-\subsubsection{Application to path tracing}
+Let $f(x) = f_1(x)f_2(x)...f_n(x)$ a function that we want to integrate over a domain $D$:
+
+\begin{equation*}
+F = \int_{D} f_1(x)f_2(x)...f_n(x) dx
+\end{equation*}
+
+Monte-Carlo suggests us to use the estimator (with one sample $x$ in that case, like in path tracing):
+
+\begin{equation*}
+\langle F \rangle = \frac{f_1(x)f_2(x)...f_n(x)}{p(x)}
+\end{equation*}
+
+But how to choose efficiently $p$ ? Suppose we have $n$ sampling strategy $p_1, p_2, ..., p_n$, with $p_i$ efficient for the function $f_i$. Let $c_1, ..., c_n$ be $n$ scalar from $[0,1]$ such that $\sum_{i = 1}{n} c_i = 1$. $c_i$ is the probability to select the strategy $p_i$ for sampling. Then the combined pdf of a sample $x$ is:
+
+\begin{equation*}
+p(x) = \sum_{i = 1}^{n} c_i p_i(x)
+\end{equation*}
+
+We use this pdf for Monte-Carlo estimation. First we choose the strategy to use, based on the probabilities $(c_i)_{i = 1...n}$, then we sample with $p_i$ and then we estimate the integral by $\frac{f_1(x)f_2(x)...f_n(x)}{p(x)}$. This method is called multiple importance sampling.
+
+\subsubsection{MIS for skeleton based path tracing}
+
+In our case we have the following function to integrate:
+
+\begin{equation*}
+f_r(x, \Theta \leftrightarrow \Phi) L(x \leftarrow \Phi) cos(N_x, \Phi)
+\end{equation*}
+
+We suppose that we have a pdf $p_{brdf}$ that efficiently sample $\Omega_x$ according to the product $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$ and our strategy $p_{skel}$ that efficiently sample according to $L(x \leftarrow \Phi)$.
+
+Let $c_{skel}$ be the probability to sample with the strategy $p_{skel}$ and $1 - c_{skel}$ the probability to sample with $p_{brdf}$ ($c_{skel}$ could be a parameter of the program). That gives us the following algorithm to sample:
+
+\begin{algorithm}[h!]
+\label{algo::MIS}
+\caption[MIS]{Multiple importance sampling}
+\KwData{An outcoming direction $\Theta$, a point $x$} 
+\KwResult{A incoming direction $\Phi$ and its pdf $p(\Phi)$}
+$r \gets$ a random number between 0 and 1\;
+\If{$r \leq c_{skel}$} {
+	\Return $\Phi \gets sample(\Omega_x, p_{skel})$
+} \Else {
+	\Return $\Phi \gets sample(\Omega_x, p_{brdf})$
+}
+
+\Return $\Phi, p(\Phi) \gets c_{skel} p_{skel}(\Phi) + (1 - c_{skel}) p_{brdf}(\Phi)$
+\end{algorithm}
+
+\subsubsection{Results}
+

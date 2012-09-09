@@ -51,9 +51,9 @@ This equation express an intuitive idea: the radiance produced by the point $x$ 
 
 The reflected radiance is computed by taking all the possible directions of the hemisphere around $x$ and integrate the incoming radiance along those directions scaled by a factor $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$. 
 
-The cosine is used to attenuate the radiance that arrive by a "direction rasante". 
+The cosine is used to attenuate the radiance that arrive by a "direction rasante". $N_x$ is the surface's normal at point $x$.
 
-The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. It has to respect three properties to be physically coherent:
+The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. Intuitively it represents the material properties of the surface at point $x$. A mirror doesn't reflect light the same manners a wall do, the BRDF encodes that. The BRDF has to respect three properties to be physically coherent:
 
 \begin{itemize}
 \item Helmotz reciprocity: $f_r(x, \Theta \leftrightarrow \Phi) = f_r(x, \Phi \leftrightarrow \Theta)$
@@ -92,14 +92,80 @@ Then if we increase the number of samples we decrease the variance and the estim
 
 This str	ategy of choosing a good pdf is called \myem{importance sampling} and is over-used in global illumination to improve the convergence of the algorithms.
 
+In the path tracing algorithm we cannot use more than one sample. Actually the evaluation of the integrand implies the evaluation of $L$ and thus a new application of the Monte-Carlo estimator. So if we use more than one sample the complexity of the algorithm becomes exponential (O($d^N$) with $d$ the length of a path and $N$ the number of samples).
+
 \subsubsection{The algorithm}
 
-Donner l'algorithme en pseudo-code
+We are now able to construct the algorithm for computing radiance:
+
+\begin{algorithm}[h!]
+\label{algo::incoming_radiance}
+\caption[incoming_radiance]{Incoming radiance $L(x \leftarrow \Phi)$}
+\KwData{An incoming direction $\Phi$, a point $x$} 
+\KwResult{$L(x \leftarrow \Phi)$}
+\Return $L(r(x, \Phi) \rightarrow -\Phi)$\;
+\end{algorithm}
+
+\begin{algorithm}[h!]
+\label{algo::radiance}
+\caption[radiance]{Radiance $L(x \rightarrow \Theta)$}
+\KwData{An outcoming direction $\Theta$, a point $x$} 
+\KwResult{$L(x \rightarrow \Theta)$}
+$L \gets L_e(x \rightarrow \Theta)$\;
+\If{continue the recursion} {
+	$\Phi \gets sample(\Omega_x, p)$ \\
+	$L \gets L + \frac{f_r(x, \Phi, \Theta) L(x \leftarrow \Phi) cos(N_x, \Phi)}{p(\Phi)}$\;
+}
+\Return L\;
+\end{algorithm}
+
+This algorithm is called for each pixel of the final image to compute. To improve the quality of the result we can throw multiple rays accross each pixel and computing the mean of the results.
+
+In the radiance algorithm the $\Phi$ direction is sampled on $\Omega_x$ based on the pdf $p$. We will discuss what pdf we use in the next section.
+
+The stopping condition of the recursion is not specified here. In our implementation we simply fix a maximum depth for the path but it's a bad solution. Actually it biased the method because some light paths have no chance to be evaluated. A better solution is to use a method called russian roulette.
 
 \subsection{Skeleton based importance sampling}
 
-Décrire la stratégie d'échantillonage basée sur le squelette
+We have presented the path tracing algorithm without describe the pdf $p$ used to sample the hemisphere around a point. The choice of the pdf is very important because the convergence speed of the algorithm depends on it. Here is the integrand of the integral estimated with Monte-Carlo:
 
-\subsection{Multiple importance sampling}
+\begin{equation*}
+f_r(x, \Phi, \Theta) L(x \leftarrow \Phi) cos(N_x, \Phi)
+\end{equation*}
 
-Décrire comment combiner les stratégies brdf + skeleton
+To improve the quality we have to choose a pdf that match the shape of this function. There is a cosine factor in the function. It takes higher values when $\Phi$ is close to $N_x$. That means we have to give better chances to be samples to directions that are close to the normal. But it's not enough: when the environment is not totally diffuse, the brdf take higher values for some pair of directions. A perfect mirror, for exemple, reflect light only in a single direction: the symetric of $\Theta$ by the normal $N_x$. In that case it's totally useless to sample $\Omega_x$, we juste have to take the correct direction without taking into account the cosine.
+
+The most common strategy used to sample $\Omega_x$ is to use the BRDF because we know it: it is given as an input of the algorithm for exemple with textures.
+
+$L$ is rarelly used because we cannot evaluate it in constant time. Remember that it represents the distribution of light in the scene. It takes high values when $\Phi$ carry a lot of energy. Out method is based an a topological skeleton of the void (because light travels in the void) to sample $\Omega_x$ according to $L$.
+
+\subsubsection{Computation of the skeleton}
+
+The skeleton is computed in two steps:
+
+\begin{itemize}
+\item Voxelization of the void
+\item Skeletonization in the cubical complex framework
+\end{itemize}
+
+The voxelization is done with a software called \of Binvox \fg. It voxelizes the surfaces of the scene and we invert it to get the voxelization of the void. The voxelization is then converted to a cubical complex and we apply our algorithm to skeletonize it. We get a curvilinear skeleton that has the same topology than the void.
+
+The skeleton is represented by a graph of 3D positions with edges encoding the topology.
+
+\subsubsection{Construction of the importance points}
+
+Given the skeleton we compute a set of points called importance points. This points will be used to sample $\Omega_x$ in the path tracing algorithm.
+
+Let $L$ be a light of the scene ($L \in S_L$) and $n_L$ the shortest visible node by $L$. We first compute a tree of shortest paths along the skeleton with $n_L$ as root. For that we use the Dijkstra algorithm with a distance based on visibility from $n_L$: We put $d(n, m) = 1$ if $m$ is visible from $n_L$ and $d(n, m) = 10$ if not. It results that the paths that are enlighted by $L$ will have a shorter distance.
+
+Let $n$ be a node of the skeleton and $V_n$ the set of visible nodes from $n$ along the shortest path toward $n_L$. The importance point $imp_n$ associated to $n$ is computed by taking the barycenter of $V_n$.
+
+\subsubsection{Sampling according to $L$}
+
+\subsubsection{Problems}
+
+\subsection{Skeleton based multiple importance sampling}
+
+\subsubsection{Multiple importance sampling}
+
+\subsubsection{Application to path tracing}

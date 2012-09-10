@@ -4,7 +4,7 @@
 
 Path tracing is a global illumination algorithm that is able to render photo-realistic images of a virtual scene viewed by a camera. The idea behind the algorithm is very simple: for each pixel of the image, throw rays through the pixel that will bounce on the scene to accumulate lighting exchanges. In order to get fast convergence the rays must be efficiently distributed through the scene, toward the lights. Our idea is to use a curvilinear skeleton of the void of the scene to guide the rays in the correct direction. We start by defining some useful concepts related to path tracing and we present our skeleton based path tracing algorithm.
 
-\subsubsection{Basic definitions of radiometry}
+\subsection{Basic definitions of radiometry}
 
 Let $S$ be a set of surfaces of $\Rset^3$ that don't overlap and $S_L \subset S$ a set of surface lights. $S$ is called the scene.
 
@@ -45,7 +45,7 @@ The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF
 
 It's actually the rendering equation that a path tracer try to resolve. Let $O$ be the origin of the camera and $I$ the image we want to compute (a rectangle embedded in $\Rset^3$). Then the path tracing algorithm compute an approximation of the radiances $L(O \leftarrow \vec{OP})$, $\forall P \in I$.
 
-\subsubsection{Solving the rendering equation}
+\subsection{Solving the rendering equation}
 
 The rendering equation is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
 
@@ -69,7 +69,7 @@ The variance clearly depends on the choosen pdf $p$. Actually the best is to cho
 
 This str	ategy of choosing an adapted pdf is called \myem{importance sampling} and is over-used in global illumination to improve the convergence of the algorithms.
 
-\subsubsection{The algorithm}
+\subsection{The path tracing algorithm}
 
 \begin{algorithm}[h!]
 \label{algo::incoming_radiance}

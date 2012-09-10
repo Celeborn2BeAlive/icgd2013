@@ -82,15 +82,13 @@
 
 \mainmatter
 
-\title{A 3d curvilinear skeletonization algorithm with application to bidirectional path tracing}
+\title{A 3d curvilinear skeletonization algorithm with application to path tracing}
 \author{John Chaussard\inst{1} \and Laurent No\"{e}l\inst{2} \and Venceslas Biri\inst{2} \and Michel Couprie\inst{2}}
 \institute{Universit\'{e} Paris 13, Sorbonne Paris Cit\'{e}, LAGA, CNRS(UMR 7539), \\ F-93430, Villetaneuse, France \\ \email{chaussard@math.univ-paris13.fr}
 \and
 Universit\'{e} Paris Est, LABINFO-IGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, Cit\'{e} DESCARTES \\ BP 99  93162 Noisy le Grand CEDEX, France \\ \email{laurent.noel@esiee.fr, v.biri@esiee.fr, michel.couprie@esiee.fr}}
 
-
 \maketitle
-
 
 \begin{abstract}
 What we propose is really great...
@@ -105,8 +103,7 @@ What we propose is really great...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \label{sec::intro}
-Blah blah blah...
-
+Noise in photorealistic computer generated images. Need to accelerate convergence. Add knowledge of the geometry and topology of the scene thanks to discrete geometry. Use the skeleton. Need of a robust curvilinear skeleton that represent topology and approximate geometry. Use the cubical complex framework.
 
 \section{The cubical complex framework}
 
@@ -156,9 +153,6 @@ Let $\complex{n}{X}$, and let $(f,g)$ be a free pair for $X$. The complex $X \se
 
 Let $\complex{n}{Y}$, the complex $X$ \myem{collapses onto} $Y$ if there exists a sequence of complexes $(X_0,...,X_\ell)$ of $\allfaces{n}$ such that $X=X_0$, $Y=X_\ell$ and for all $i \in \dinterval{1}{\ell}, X_{i}$ is an elementary collapse of $X_{i-1}$. We also say, in this case, that $Y$ \myem{is a collapse of} $X$.
 \end{definition}
-
-
-
 
 \section{A parallel directional thinning based on cubical complex}
 

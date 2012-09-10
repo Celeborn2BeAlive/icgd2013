@@ -17,10 +17,19 @@
 \newcommand{\centerness}{Decenter}
 
 \def\OneBall#1{\mathbb{B}^{1}_{#1}}
-\def\MaxOneBall#1{\hat{\OneBall{#1}}}
+\def\MaxOneBall#1{\mathbb{M}\OneBall{#1}}
 
-\def\dd{\omega}
-\def\DD{\Omega}
+\def\mydist1{D_1}
+\def\mydd1{\Omega_1}
+\def\mydecent{\mathcal{DC}_1}
+\def\dist1{d_1}
+\def\Dist1#1{\mydist1(#1)}
+\def\DD1#1{\mydd1(#1)}
+\def\decent#1{\mydecent(#1)}
+\def\cplDist1#1{\mydist1^{cc}(#1)}
+\def\cplDD1#1{\mydd1^{cc}(#1)}
+\def\cpldecent#1{\mydecent^{cc}(#1)}
+
 
 \def\mydef#1{{\em #1}}
 \def\myem#1{{\em #1}}
@@ -34,6 +43,7 @@
 
 \def\Nset{\mathbb{N}}
 \def\Zset{\Z}
+\def\Nset{\mathbb{N}}
 \def\Rset{\mathbb{R}}
 \def\Z{\mathbb{Z}}
 \def\Zhalf{\frac{\mathbb{Z}}{2}}
@@ -52,7 +62,7 @@
 \def\mydim#1{\dim(#1)}
 \def\type#1{\mbox{\it{}Dir\/}(#1)}
 \def\orient#1{\mbox{\it{}Orient\/}(#1)}
-\def\border#1{\mbox{\it{}CBorder\/}(#1)}
+\def\border#1{\mbox{\it{}Border\/}(#1)}
 \def\suchthat{\;|\;}
 \def\inter{\cap}
 \def\union{\cup}
@@ -73,8 +83,10 @@
 \mainmatter
 
 \title{A 3d curvilinear skeletonization algorithm with application to bidirectional path tracing}
-\author{John Chaussard \and Venceslas Biri \and Michel Couprie}
-\institute{Universit\'{e} Paris Est, LABINFO-IGM, A2SI-ESIEE \\ 2, boulevard Blaise Pascal, Cit\'{e} DESCARTES \\ BP 99  93162 Noisy le Grand CEDEX, France \\ \email{chaussaj@esiee.fr, bertrang@esiee.fr, coupriem@esiee.fr}}
+\author{John Chaussard\inst{1} \and Laurent No\"{e}l\inst{2} \and Venceslas Biri\inst{2} \and Michel Couprie\inst{2}}
+\institute{Universit\'{e} Paris 13, Sorbonne Paris Cit\'{e}, LAGA, CNRS(UMR 7539), \\ F-93430, Villetaneuse, France \\ \email{chaussard@math.univ-paris13.fr}
+\and
+Universit\'{e} Paris Est, LABINFO-IGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, Cit\'{e} DESCARTES \\ BP 99  93162 Noisy le Grand CEDEX, France \\ \email{laurent.noel@esiee.fr, v.biri@esiee.fr, michel.couprie@esiee.fr}}
 
 
 \maketitle
@@ -100,49 +112,44 @@ Blah blah blah...
 
 \subsection{Basic definitions}
 
-In the 3d cubical complex framework, objects are no more made of voxel, but of cubes, squares, lines and vertices $\mathbb{R}$. 
+In the 3d voxel framework, objects are made of voxels. In the 3d cubical complex framework, objects are made of cubes, squares, lines and vertices. 
 Let $\Z$ be the set of integers, we consider the family of sets $\mathbb{F}^1_0$ and $\mathbb{F}^1_1$, such that $\mathbb{F}^1_0 = \{\{a\} \suchthat a \in \Z\}$ and $\mathbb{F}^1_1 = \{ \{a, a+1\} \suchthat a \in \Z\}$. Any subset $f$ of $\Z^n$ such that $f$ is the cartesian product of $m$ elements of $\mathbb{F}^1_1$ and $(n-m)$ elements of $\mathbb{F}^1_0$ is called a face or an \myem{$m$-face} of $\Z^n$, $m$ is the dimension of $f$, we write $dim(f)=m$. A $0$-face is called a \myem{vertex}, a $1$-face is an \myem{edge}, a $2$-face is a \myem{square}, and a $3$-face is a \myem{cube}.
 
 We denote by $\allfaces{n}$ the set composed of all faces in $\Z^n$. Given $m \in \dinterval{0}{n}$, we denote by $\subfaces{n}{m}$ the set composed of all $m$-faces in $\Z^n$.
 
-Let $f \in \allfaces{n}$. We set $\cell{f} = \{g \in \allfaces{n}\vert g \subseteq f\}$, and $\cellstrict{f} = \cell{f} \setminus \{f\}$. Any element of $\cell{f}$ is \myem{a face of $f$}, and any element of $\cellstrict{f}$ is \myem{a proper face of $f$}. We call \myem{star of $f$} the set $\cont{f} = \{g \in \allfaces{n} \vert f \subseteq g\}$, and we write $\contstrict{f} = \cont{f} \setminus \{f\}$: any element of $\cont{f}$ is a \myem{coface of $f$}. It is plain that $g\in\cell{f}$ iff $f\in\cont{g}$.
+Let $f \in \allfaces{n}$. We set $\cell{f} = \{g \in \allfaces{n}\vert g \subseteq f\}$, and $\cellstrict{f} = \cell{f} \setminus \{f\}$. Any element of $\cell{f}$ is \myem{a face of $f$}, and any element of $\cellstrict{f}$ is \myem{a proper face of $f$}. We set $\cont{f} = \{g \in \allfaces{n} \vert f \subseteq g\}$, and $\contstrict{f} = \cont{f} \setminus \{f\}$. It is plain that $g \in \cell{f}$ iff $f \in \cont{g}$.
 
 A set $X$ of faces in $\allfaces{n}$ is a \myem{cell}, or \myem{$m$-cell}, if there exists an $m$-face $f \in X$ such that $X=\cell{f}$. The \myem{closure} of a set of faces $X$ is the set $\closure{X}=\union\{\cell{f} \vert f \in X\}$. The set $\Compl{X}$ is $\allfaces{n} \setminus X$. 
 
 \begin{definition}
-A finite set $X$ of faces in $\allfaces{n}$ is a \myem{cubical complex} if $X=\closure{X}$, and we write $\complex{n}{X}$. 
+A finite set $X$ of faces in $\allfaces{n}$ is a \myem{complex} if $X=\closure{X}$, and we write $\complex{n}{X}$. 
 
 Any subset $Y$ of $X$ which is also a complex is a \myem{subcomplex of $X$}, and we write $\subcomplex{Y}{X}$.
 \end{definition}
 
 
-Informally, in 3d, a set of face is a cubical complex if, for each cube of the complex, the six squares (sides) of the cube also belong to the complex, for each square of the complex, the four edges (sides) of the square also belong to the complex, and for each edge of the complex, the two vertices (extremities) of the edge also belong to the complex.
+Informally, in 3d, a set of faces $X$ is a complex if each side (square) of a cube of $X$ also belong to $X$, each edge of a square of $X$ also belong to $X$, and each vertex of an edge of $X$ also belong to $X$. 
 
-A face $f \in X$ is \myem{a facet of $X$} if $f$ is not a proper face of any face of $X$. We denote by $\princ{X}$ the set composed of all facets of $X$ . A complex $X$ is \myem{pure} if all its facets have the same dimension. The \myem{dimension of $X$} is $\mydim{X} = \max\{\mydim{f} \suchthat f \in X\}$. If $\mydim{X} = d$, then we say that $X$ is a $d$-complex. The notions of purity and dimensions can be trivially extended to sets of faces.
-
-In $\allfaces{n}$, a complex $X$ is \myem{thin} if $\mydim{X}<n$. In $\allfaces{3}$, a complex is thin if it contains no cube.
+A face $f \in X$ is \myem{a facet of $X$} if $f$ is not a proper face of any face of $X$. We denote by $\princ{X}$ the set composed of all facets of $X$ . A complex $X$ is \myem{pure} if all its facets have the same dimension. The \myem{dimension of $X$} is $\mydim{X} = \max\{\mydim{f} \suchthat f \in X\}$. If $\mydim{X} = d$, then we say that $X$ is a $d$-complex.
 
 
 
 \subsection{From binary images to cubical complex}
 \label{sec::binary_to_cubic}
 
-Traditionally, a binary image is defined as a finite subset of $\Zset^n$ (with $n=2$ or $n=3$). Given $S \subseteq \Zset^n$, the object voxels are the elements of $S$. This kind of image is the most common one in the field of image processing so, in order to work in cubical complex framework, we need to find a way to transpose a binary image to cubical complex framework.
+Traditionally, a binary image is a finite subset of $\Zset^n$ (called voxel image when $n=3$). We give now a simple way to transpose such image to the cubical complex framework.
 
-Informally, to do so, we associate to each element of $S\subseteq \Zset^n$ an n-face of $\allfaces{n}$ (to a pixel we associate a square, to a voxel we associate a cube). More precisely, let $x=(x_1,...,x_n) \in S$, we define the n-face $\Phi(x) = \{x_1, x_1 + 1\} \times \ldots \times \{x_n, x_n + 1\}$. We can extend the map $\Phi$ to sets: $\Phi(S)=\{\Phi(x) | x \in S\}$. Given a binary image $S$, we associate to it the cubical complex $\closure{\Phi(S)}$ (see Fig.~\ref{fig::voxel_to_complex}).
-
-In the following, most of the objects we consider were indeed binary images which were then transposed into cubical complex framework: this is why most of the two-dimensional complexes we show are pure 2-complexes, and most of the three-dimensional complexes we show are pure 3-complexes. 
-
+To do so, we associate to each element of $S\subseteq \Zset^n$ an n-face of $\allfaces{n}$. More precisely, let $x=(x_1,...,x_n) \in S$, we define the n-face $\Phi(x) = \{x_1, x_1 + 1\} \times \ldots \times \{x_n, x_n + 1\}$. We can extend the map $\Phi$ to sets: $\Phi(S)=\{\Phi(x) | x \in S\}$. Given a set $S \subset \Zset^n$, we associate to it the cubical complex $\closure{\Phi(S)}$.
 
 
 \subsection{Thinning: the collapse operation}
-The collapse operation is the basic operation for performing homotopic thinning of a complex. It consists of removing two distinct elements $(f,g)$ from a complex $X$ under the condition that $g$ is contained in $f$ and is not contained in any other element of $X$. This operation may be repeated several times.
+The collapse operation is the basic operation for performing homotopic thinning of a complex, and consists of removing two distinct faces $(f,g)$ from a complex $X$ under the condition that they are free:
 
 \begin{definition}
-Let $\complex{n}{X}$, and let $f,g$ be two faces of $X$. The face $g$ is \myem{free for $X$}, and the pair $(f,g)$ is \myem{a free pair for $X$} if $f$ is the only face of $X$ such that $g$ is a proper face of $f$. 
+Let $\complex{n}{X}$, and let $f,g$ be two faces of $X$. The face $g$ is \myem{free for $X$}, and the pair $(f,g)$ is \myem{a free pair for $X$} if $(\contstrict{g} \inter X) = \{f\}$. 
 \end{definition}
 
-In other terms, $(f,g)$ is a free pair for $X$ whenever $\contstrict{g} \inter X = \{f\}$ ($g$ is included only in $f$). It can be easily seen that if $(f,g)$ is a free pair for a complex $X$ and $\dim(f)=m$, then $f$ is a facet and $\dim(g) = m-1$.
+It can be easily seen that if $(f,g)$ is a free pair for a complex $X$, then $f$ is a facet of $X$ and $\dim(g) = \dim(f)-1$.
 
 \begin{definition}
 Let $\complex{n}{X}$, and let $(f,g)$ be a free pair for $X$. The complex $X \setminus \{f,g\}$ is an \myem{elementary collapse of $X$}.
@@ -150,69 +157,21 @@ Let $\complex{n}{X}$, and let $(f,g)$ be a free pair for $X$. The complex $X \se
 Let $\complex{n}{Y}$, the complex $X$ \myem{collapses onto} $Y$ if there exists a sequence of complexes $(X_0,...,X_\ell)$ of $\allfaces{n}$ such that $X=X_0$, $Y=X_\ell$ and for all $i \in \dinterval{1}{\ell}, X_{i}$ is an elementary collapse of $X_{i-1}$. We also say, in this case, that $Y$ \myem{is a collapse of} $X$.
 \end{definition}
 
-We insist here on the fact that, if $Y$ is a collapse of a complex $X$, then $Y$ is a complex.
-
-Let us now introduce some elements that will serve later for proving the thinness of our skeletons.
-Let $f_0,f_\ell$ be two $n$-faces of $\allfaces{n}$ (with $\ell$ being even). An \myem{$(n-1)$-path from $f_0$ to $f_\ell$} is a sequence $\pi =
-(f_0,...,f_\ell)$ of faces of $\allfaces{n}$ such that for all $i \in \dinterval{0}{\ell}$, either $i$ is even and $f_i$ is an $n$-face, or $i$ is odd and $f_i$ is an $(n-1)$-face with $\contstrict{f_i}=\{f_{i-1}, f_{i+1}\}$ (such path always exists).
-
-\begin{proposition}
-\label{prop:thinness}
-Let $\complex{n}{X}$ be an $n$-complex, with $n > 0$. Then $X$ has at least one free $(n-1)$-face.
-\end{proposition}
-
-\begin{proof}
-Since $X$ is an $n$-complex (hence $X$ is finite) there exists an $n$-face $a$ in $X$ and an $n$-face $b$ in $\Compl{X}$. Obviously, there exists an $(n-1)$-path from $a$ to $b$. Let $h$ be the first $n$-face of $\pi$ that is not in~$X$, let $k$ be the last $n$-face of $\pi$ before $h$ (thus $k$ is in $X$), and let $e = k \inter h$ be the $(n-1)$-face of $\pi$ between $k$ and $h$. Since $k$ and $h$ are the only two $n$-faces of $\allfaces{n}$ that contain $e$, we see that the pair $(k,e)$ is free for $X$. $\finproof$
-\end{proof}
-
-In conclusion, in $\allfaces{3}$, as long as a complex still contains $3$-faces, it has a free $2$-face and more collapse operations can be performed. Therefore, it is possible to perform collapse on a complex until no more $3$-faces (volumes) can be found (until it is thin).
-
-As in the DT framework, it is sometimes necessary to perform collapse in the cubical complex framework while preserving some faces safe from deletion: these faces are the so-called inhibitor set. When using an inhibitor set during collapse, the guarantee of having a thin result does no more hold. As illustrated on figure ffjkz, the inhibitor set can be thin and a result of the constrained thinning can still not be thin.
-However, under some conditions, it is possible to use an inhibitor set while collapsing, and still have the guarantee of getting a thin result. In order to prove this, let us state the following:
-
-\begin{lemma}
-\label{lem::remove_small_pairs}
-Let $\complex{n}{X}$, let $(f_1,g_1)$ be a free pair of $X$, and $(f_2,g_2)$ be a free pair of $(X \backslash \{f_1,g_1\})$. If $\dim(f_2) > \dim(f_1)$, then $(f_2,g_2)$ is free for $X$. 
-\end{lemma}
-
-\begin{proof} If $(f_2,g_2)$ is a free pair of $(X \backslash \{f_1,g_1\})$, then $g_2$ is included in only one face of $(X \backslash \{f_1,g_1\})$, which is $f_2$. As $(\dim(g_2) = \dim(f_2) -1)$ and $(\dim(f_1) \leq (\dim(f_2)-1))$, then $g_2 \nsubseteq f_1$ and $g_2 \nsubseteq g_1$. Therefore, $g_2$ is included in only one face of $X$, which is $f_2$: therefore, $(f_2,g_2)$ is free for $X$.$\finproof$
-\end{proof}
-
-This lemma implies that, when one has a sequence of removal of free pairs of faces from a complex, one can only keep the free pairs of highest dimension and still have a sequence of removal of free pairs from the complex. 
-
-The following proposition explains which conditions on the inhibitor set (denoted $W$) need to be matched in order to guarantee the thinness of the result of a thinning constrained by $W$.
-
-\begin{proposition}
-\label{prop::thin_with_inhibit}
-Let $X$ be an $n$-complex with $n>0$, let $S$ be a collapse of $X$ such that $\dim(S) \leq (n-1)$ and let $\subcomplex{W}{S}$. Let $Y$ be a collapse of $X$ such that $W \subseteq Y$ and such that there are no free pairs in $Y$ included in $Y \backslash W$. Then, the dimension of $Y$ is inferior or equal to $(n-1)$.
-\end{proposition}
-
-\begin{proof}
-In the following, we show that if there exists an $n$-face in $Y$, then it belongs to a free pair for $Y$ that is included in $Y \backslash W$, a contradiction with the hypothesis of the proposition.
-
-Let $C = ((a_1, b_1),...,(a_k, b_k))$ be a sequence of removal of free faces which allows to obtain $S$ from $X$: for all $i \in [1;k], (a_i, b_i)$ is free for $X \backslash \{a_1, b_1, ..., a_{i-1}, b_{i-1}\}$ and $S = X \backslash \{a_1, b_1, ..., a_k, b_k\}$. 
-Let $C'$ be the sequence $C$ restrained only to free pairs containing an $n$-face: $C' = ((f_1, g_1),...,(f_h, g_h))$. A consequence of lemma \ref{lem::remove_small_pairs} is that, for all $i \in [1;h], (f_i, g_i)$ is free for $X \backslash \{f_1, g_1, ..., f_{i-1}, g_{i-1}\}$ and $(X \backslash \{f_1, g_1, ..., f_k, g_k\})$ is a collapse of $X$. 
-
-Any $n$-face $c \in Y$ is such that $c \in X$ and $c \notin S$, and therefore there exists $j \in [1;h]$ such that $c = f_j$. Without loss of generality, let $j$ be the smallest integer such that $f_j \in Y$: for all $k \in [1;j-1]$, $f_k \notin Y$ and $g_k \notin Y$. As previously said, $(f_j, g_j)$ is free for $(X \backslash \{f_1, g_1, ..., f_{j-1}, g_{j-1}\})$: $g_j$ is included in only one face of $(X \backslash \{f_1, g_1, ..., f_{j-1}, g_{j-1}\})$, and this face is $f_j$.
-
-As $\{f_1, g_1, ..., f_{j-1}, g_{j-1}\} \cap Y = \emptyset$ and that $f_j \in Y$, then $g_j$ is included in only one face of $Y$, and that face is $f_j$. Consequently, the pair $(f_j, g_j)$ is free for $Y$. Moreover, the pair $(f_j, g_j)$ belongs to the sequence $C$, therefore $f_j \notin S$ and $g_j \notin S$. As $W \subseteq S$, the pair $(f_j, g_j)$ is included in $Y \backslash W$.$\finproof$
-\end{proof}
-
 
 
 
 \section{A parallel directional thinning based on cubical complex}
 
 \subsection{Removing free pairs in parallel}
-In the cubical complex framework, parallel removal of simple pairs can be easily achieved when following simple rules that we will give now. First, we need to define the \myem{direction} and the \myem{orientation} of a free face.
+In the cubical complex framework, parallel removal of simple pairs can be easily achieved when following simple rules that we give now. First, we need to define the \myem{direction} and the \myem{orientation} of a free face.
 
 Let  $f \in \allfaces{n}$, the \myem{center of $f$} is the center of mass of the points in $f$, that is, $c_f= \frac{1}{\Card{f}}\sum_{a \in f}{a}$. The center of $f$ is an element of $[\Zhalf]^n$, where $\Zhalf$ denotes the set of half integers.
 Let $\complex{n}{X}$, let $(f,g)$ be a free pair for $X$, and let $c_f$ and $c_g$ be the respective centers of the faces $f$ and $g$. We denote by $V(f,g)$ the vector $(c_f -c_g)$ of $[\Zhalf]^n$. 
 
-We define a surjective function $\type{}: \allfaces{n} \times \allfaces{n} \rightarrow \dinterval{0}{n-1}$ such that, for all free pairs $(f,g)$ and $(i,j)$ for $X$, $\type{f,g} = \type{i,j}$ if and only if $V(f,g)$ and $V(i,j)$ are collinear (we don't bother defining $\type{}$ for non free pairs as it won't be useful in this case). The number $\type{f,g}$ is called the \myem{direction} of the free pair $(f,g)$. Let $(f,g)$ be a free pair, the vector $V(f,g)$ has only one non-null coordinate: the pair $(f,g)$ has a \myem{positive orientation}, and we write $\orient{f,g}=1$, if the non-null coordinate of $V(f,g)$ is positive; otherwise $(f,g)$ has a \myem{negative orientation}, and we write $\orient{f,g}=0$.
-On Fig.~\ref{fig:parallel_collapse}, the free pair $(a,c)$ and the free pair $(d,e)$ have different directions; the free pairs $(a,b)$ and $(d,e)$ have the same direction, but opposite orientations.
+We define a surjective function $\type{}: \allfaces{n} \times \allfaces{n} \rightarrow \dinterval{0}{n-1}$ such that, for all free pairs $(f,g)$ and $(i,j)$ for $X$, $\type{f,g} = \type{i,j}$ if and only if $V(f,g)$ and $V(i,j)$ are collinear. The number $\type{f,g}$ is called the \myem{direction} of the free pair $(f,g)$. Let $(f,g)$ be a free pair, the vector $V(f,g)$ has only one non-null coordinate: the pair $(f,g)$ has a \myem{positive orientation}, and we write $\orient{f,g}=1$, if the non-null coordinate of $V(f,g)$ is positive; otherwise $(f,g)$ has a \myem{negative orientation}, and we write $\orient{f,g}=0$.
+%On Fig.~\ref{fig:parallel_collapse}, the free pair $(a,c)$ and the free pair $(d,e)$ have different directions; the free pairs $(a,b)$ and $(d,e)$ have the same direction, but opposite orientations.
 
-Now, we give a property of collapse which brings a necessary and sufficient condition for removing two free pairs of faces in parallel from a complex, while preserving topology (see Fig.~\ref{fig:parallel_collapse}c).
+Now, we give a property of collapse which brings a necessary and sufficient condition for removing two free pairs of faces in parallel from a complex, while preserving topology.
 
 \begin{proposition}
 \label{prop:collpar2}
@@ -220,7 +179,7 @@ Let $\complex{n}{X}$, and let $(f,g)$ and $(k,\ell)$ be two distinct free pairs 
 \end{proposition}
 
 \begin{proof}
-If $f=k$, then it is plain that $(k,\ell)$ is not a free pair for $Y=X \setminus \{f,g\}$ as $k=f \notin Y$. Also, $(f,g)$ is not free for $X \setminus \{k,\ell\}$. If $f\neq k$, then we have $g \neq \ell$, $\contstrict{g} \inter X = \{f\}$ ($g$ is free for $X$) and $\contstrict{\ell} \inter X = \{k\}$ ($\ell$ is free for $X$). Thus, we have $\contstrict{\ell} \inter Y = \{k\}$ as $\ell\neq g$ and $k\neq f$. Therefore, $(k,\ell)$ is a free pair for $Y$. $\finproof$
+If $f=k$, then it is plain that $(k,\ell)$ is not a free pair for $Y=X \setminus \{f,g\}$ as $k=f \notin Y$. Also, $(f,g)$ is not free for $X \setminus \{k,\ell\}$. If $f\neq k$, then we have $g \neq \ell$, $\contstrict{g} \inter X = \{f\}$ ($g$ is free for $X$) and $\contstrict{\ell} \inter X = \{k\}$ ($\ell$ is free for $X$). Thus, we have $\contstrict{\ell} \inter Y = \{k\}$ as $\ell\neq g$ and $k\neq f$ and $(k,\ell)$ is a free pair for $Y$. $\finproof$
 \end{proof}
 
 From Prop.~\ref{prop:collpar2}, the following corollary is immediate.
@@ -231,7 +190,7 @@ Let $\complex{n}{X}$, and let $(f_1,g_1) \ldots (f_m,g_m)$ be $m$ distinct free 
 \dinterval{1}{m}$ (with $a \neq b$), $f_a \neq f_b$. The complex $X$ collapses onto $X \setminus \{f_1,g_1 \ldots f_m,g_m\}$.
 \end{corollary}
 
-Considering two distinct free pairs $(f,g)$ and $(i,j)$ for $\complex{n}{X}$ such that $\type{f,g}=\type{i,j}$ and $\orient{f,g} = \orient{i,j}$, we have $f \neq i$.  From this observation and Cor.~\ref{cor:parallel_removal}, we deduce the following property.
+Considering two distinct free pairs $(f,g)$ and $(i,j)$ for $\complex{n}{X}$ such that $\type{f,g} = \type{i,j}$ and $\orient{f,g} = \orient{i,j}$, we have $f \neq i$.  From this observation and Cor.~\ref{cor:parallel_removal}, we deduce the following property.
 
 \begin{corollary}
 \label{cor:parallel_removal_v2}
@@ -242,7 +201,10 @@ Let $\complex{n}{X}$, and let $(f_1,g_1) \ldots (f_m,g_m)$ be $m$ distinct free 
 
 \subsection{A directional parallel thinning algorithm}
 
-We say that a $d$-face of $X$ is a \myem{border face} if it contains a free $(d-1)$-face. Define $\border{X}$ as the set of all border faces of $X$. We are now ready to introduce a directional parallel thinning algorithm (Alg.~\ref{algo::pardircollapse_v0}).
+Intuitively, we want the algorithm to remove free faces of a complex \quotes{layer by layer} and avoid having unequal thinning of the input complex. Therefore, we want each execution of the algorithm to remove free faces located on the border of the input complex. 
+We define $\border{X}$ as the set all faces belonging to a free pair for $X$. We now introduce Alg.~\ref{algo::pardircollapse_v0}, a directional parallel thinning algorithm.
+
+On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, only faces located on the border of the complex are removed (l.~\ref{pc:07}). Thanks to corollary \ref{cor:parallel_removal_v2}, we remove faces with same direction and orientation in parallel (l.~\ref{pc:08}).
 
 \begin{algorithm}[h!]
 \label{algo::pardircollapse_v0}
@@ -270,31 +232,30 @@ We say that a $d$-face of $X$ is a \myem{border face} if it contains a free $(d-
 \lnl{pc:10} \Return $X$\;
 \end{algorithm}
 
-Intuitively, we want the algorithm to remove free faces \quotes{layer by layer}: we don't want, after a single execution ($\ell =1$), to have unequal thinning of the input complex. Therefore, we want each execution of the algorithm to remove free faces located on the border of the input complex: this is why we introduce, on line \ref{pc:02} the set $L$, and that we remove only faces located in $L$ on line \ref{pc:08}. The sets $E$ (line \ref{pc:06}) and $G$ (line \ref{pc:07}) allows to remove whole sets of free faces in parallel from $X$, thanks to the direction and orientation of faces previously defined. A detailed view of each step of the algorithm is shown on Fig.~\ref{fig:step_thinning}.
 
-Different definitions of the orientation and direction can be given, corresponding to different order of removal of free faces in the complex. These changes lead to different results, but arbitrary choices on the order of removal of free pairs must be made in order to obtain, at the end, a thin skeleton (no more $n$-faces when working in the $n$-dimension). Once orientation and direction have been defined, the results of the algorithm are uniquely defined.
 
-Algorithm~\ref{algo::pardircollapse_v0} may be easily implemented to run in linear time complexity (proportionally to the number of faces of the complex). Indeed, checking if a face is free or not may be easily done in constant time. Moreover, when a free pair $(f,g)$ is removed from the input complex, it is sufficient to scan the faces of $f$ and the cofaces of $g$ in order to find new free faces, as other faces' status won't change (the implemented algorithm contains these optimizations).
+Different definitions of the orientation and direction can be given, corresponding to different order of removal of free faces in the complex and leading to different results.
+Algorithm~\ref{algo::pardircollapse_v0} can be implemented to run in linear time complexity (proportionally to the number of faces of the complex). Indeed, checking if a face is free or not may be easily done in constant time. Moreover, when a free pair $(f,g)$ is removed from the input complex, it is sufficient to scan the elements of $(\cellstrict{f} \union \contstrict{g})$ in order to find new free faces.
 
 
 
 \section{Aspect preservation during thinning: a parameter-free method}
 \label{sec::aspect_no_param}
-Algorithm \ref{algo::pardircollapse_v0} does not necessarily preserves "geometrical information" of the original object in the resulting skeleton. For example, if the input was a filled human shape (one connected component, no tunnel nor cavity) and that $W=\emptyset$ and $l=+\inf$, then the result of Alg.~\ref{algo::pardircollapse_v0} would be a simple vertex. However, when one wants to preserve "geometrical information" from the original shape in the skeleton, then one expects to obtain a "stickman" from a human shape. However, it is important to not retain "too much information" during thinning in order to avoid noisy branches in the skeleton.
+Algorithm \ref{algo::pardircollapse_v0} does not necessarily preserves "geometrical information" from the original object in the resulting skeleton. For example, if the input was a filled human shape (one connected component, no tunnel nor cavity) and that $W=\emptyset$ and $l=+\inf$, then the result of Alg.~\ref{algo::pardircollapse_v0} would be a simple vertex. However, when one wants to preserve "geometrical information" from the original shape in the skeleton, then one expects to obtain a "stickman" from a human shape. It is however important to not retain "too much information" during thinning in order to avoid noisy branches in the skeleton.
 
-In the following, we will see a new method in the cubical complex, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory visual properties. This will be achieved by adding, in the set $W$ of Alg.~\ref{algo::pardircollapse_v0} some faces of the original object.
+In the following, we will see a new method in the cubical complex, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory visual properties. This will be achieved by adding, in the set $W$ of Alg.~\ref{algo::pardircollapse_v0}, some faces from the original object during the thinning process.
 
 \subsection{The lifespan of a face}
-In the following, we define new notions in the cubical complex. The first one we present is the \myem{death date} of a face.
+In the following, we define more notions in the cubical complex. The first one we present is the \myem{death date} of a face.
 
 \begin{definition}
 Let $f \in \complex{n}{X}$, the \myem{death date of $f$ in $X$}, denoted by $\death{f}{X}$, is the smallest integer $d$ such that $f \notin ParDirCollapse(X, \emptyset, d)$. 
 \end{definition}
 
-The death date of a face indicates how many layers of free faces should be removed from a complex $X$, using alg.~\ref{algo::pardircollapse_v0}, before removing completely the face from $X$. We now define the \myem{birth date} of a face:
+The death date of a face indicates how many layers of free faces should be removed from a complex $X$, using Alg.~\ref{algo::pardircollapse_v0}, before removing completely the face from $X$. We now define the \myem{birth date} of a face:
 
 \begin{definition}
-Let $f \in \complex{n}{X}$, the \myem{birth date of $f$ in $X$}, denoted by $\birth{f}{X}$, is the minimum between the smallest integer $b$ such that $f$ is a facet of $ParDirCollapse(X, \emptyset, b)$, and $\death{f}{X}$. 
+Let $f \in \complex{n}{X}$, the \myem{birth date of $f$ in $X$}, denoted by $\birth{f}{X}$, is the smallest integer $b$ such that either $f$ is a facet of $ParDirCollapse(X, \emptyset, b)$, or either $f \notin ParDirCollapse(X, \emptyset, b)$.
 \end{definition}
 
 The birth date indicates how many layers of free faces must be removed from $X$ with Alg.\ref{algo::pardircollapse_v0} before transforming $f$ into a facet of $X$ (we consider a face "lives" when it is a facet).
@@ -313,136 +274,79 @@ Let $f \in \complex{n}{X}$, the lifespan of $f$ in $X$ is the integer
 \end{math}
 \end{definition}
 
-The three parameters previously defined are dependant on the order of direction and orientation chosen for algorithm $ParDirCollapse$.
+These three values are dependant on the order of direction and orientation chosen for Alg.~\ref{algo::pardircollapse_v0}.
 
-The lifespan of a face $f$ of $X$ indicates how many "rounds" this face "survives" as a facet in $X$, when removing free faces with algorithm \ref{algo::pardircollapse_v0}. The lifespan, the death and the birth, as defined here, are dependant of Alg.~\ref{algo::pardircollapse_v0}, used for performing the thinning. It is of course possible to use another algorithm for performing the thinning, leading to other values of birth, death and lifespan. It is recommended, in order to have "comparable" values, to compute these three parameters with the same thinning technique.
-
-Algorithm \ref{algo::lifespan} computes the lifespan of all faces of a complex. The algorithm is not linear in time, however, a linear implementation of such algorithm exists and is presented in the appendix. On Fig.~\ref{fig:lifespan_exemple}, we show a sequence of collapse allowing to compute the lifespan of an edge.
-%Todo lien avec annexe
+The lifespan of a face $f$ of $X$ indicates how many "rounds" this face "survives" as a facet in $X$, when removing free faces with Alg.~\ref{algo::pardircollapse_v0}. 
+The lifespan is a good indicator of how important a face can be in an object. Typically, higher the lifespan is, and more representative of an object's visual feature the face is. The lifespan, sometimes called \myem{saliency}, was used in \cite{Liu2009} (with the name "medial persistence") in order to propose a thinning algorithm in cubical complexes based on two parameters.
 
 
-\begin{algorithm}[h!]
-\label{algo::lifespan}
-\caption[Lifespan]{$Lifespan(X)$}
-\SetKwFor{ForAll}{for all}{do}{end}
-\KwData{A cubical complex $\complex{n}{X}$}
-\KwResult{The map giving the lifespan of all faces of $X$}
-\ForAll{$f \in X$}{
-  $Death(f)=+\infty$\;
-  \If{$f \in \princ{X}$}{
-    $Birth(f)=0$\;
-  }
-  \Else{
-    $Birth(f)=+\infty$\;
-  }
-}
-$Y=X; l=0$\;
-\While{there exists free faces for $Y$}{
-  $Y=ParDirCollapse(Y,\emptyset,1)$\;
-  $l=l+1$\;
-  \ForAll{$f \in \princ{Y}$ such that $Birth(f)=+\infty$}{
-  	$Birth(f)=l$\;
-  }
-  \ForAll{$f \notin Y$ such that $Death(f)=+\infty$ and $f \in X$}{
-  	$Death(f)=l$\;
-  }
-}
-\ForAll{$f \in X$}{
-  $Birth(f)=\min(Birth(f), Death(f))$\;
-  \If{$Death(f)=+\infty$}{
-    $Lifespan(f)=+\infty$\;
-  }
-  \Else{
-    $Lifespan(f)=Death(f) - Birth(f)$\;
-  }
-}
-\Return $Lifespan$\;
-\end{algorithm}
 
-The lifespan is a good indicator of how important a face can be in an object. Typically, higher the lifespan is, and more representative of an object's visual feature the face is. The lifespan, also called \myem{saliency}, was used in \cite{Liu2009} (under the name "medial persistence") in order to propose a thinning algorithm in cubical complexes based on two parameters.
-
-
-\subsection{Distance map and opening function}
+\subsection{Distance map, opening function and decenterness map}
 \label{subsec::distmap}
-In addition to the lifespan of a face, the proposed homotopic thinning method will use information on distance between faces in order to decide if a face should be kept safe from deletion. We define hereafter the various notions needed for this, based on distance in the DT framework.
+In addition to the lifespan of a face, the proposed homotopic thinning method uses information on distance between faces in order to decide if a face should be kept safe from deletion. We define hereafter the various notions needed for this, based on distance in the voxel framework.
 
-Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal or inferior to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. 
+Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal or inferior to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. Remark that $d_1$ is indeed the $6$-distance in the 3d voxel framework.
 
-We set $d_1(x,y)$ as the length of the shortest $1$-path from $x$ to $y$. Let $S \subset \Zset^n$, we set $d_1(x,S) = \displaystyle \min_{y \in S} d_1(x,y)$. The \myem{$1$-ball of radius $r$ centered on $x$} is the set $\OneBall{r}(x)=\{y \in \Zset^n | d_1(x,y) < r\}$. Remark that $d_1$ is indeed the so-called $4$-distance in the 2d DT framework, and the $6$-distance in the 3d DT framework.
-Given $X \subset \Zset^n$, the \myem{maximal $1$-ball of $X$ centered on $x$} is the set $\MaxOneBall{X}(x) = \OneBall{d_1(x,\Compl{X})}(x)$. 
+We set $\dist1(x,y)$ as the length of the shortest $1$-path from $x$ to $y$. Let $S \subset \Zset^n$, we set, for all $x \in Zset^n$, the map $\Dist1{S}: \Zset^n \rightarrow \Nset$ such that $\Dist1{S}(x) = \displaystyle \min_{y \in \Compl{S}} \dist1(x,y)$. 
 
-We set, for all $x \in X$, $\dd_1(x,\Compl{X}) = \displaystyle \max_{x \in \MaxOneBall{X}(y)} d_1(y,\Compl{X})$: this value indicates the radius of the largest maximal $1$-ball contained in $X$ and containing $x$. If $x \in \Compl{X}$, we set $\dd_1(x,\Compl{X}) = 0$. The map $\dd_1$ is known as the opening function (based on the $1$-distance): it allows to compute efficiently results of openings by balls of various radius, and gives information on the local thickness of an object on each of its points. We show some examples of the opening function on Fig.~\ref{fig::globalopening} and \ref{fig::detailopening}.
+The \myem{maximal $1$-ball of $S$ centered on $x$} is the set $\MaxOneBall{S}(x)=\{y \in \Zset^n | \dist1(x,y) < \Dist1{S}(x)\}$.
+We set, for all $x \in S$, the map $\DD1{S}: \Zset^n \rightarrow \Nset$ such that $\DD1{S}(x) = \displaystyle \max_{x \in \MaxOneBall{S}(y)} \Dist1{S}(y)$: this value indicates the radius of the largest maximal $1$-ball contained in $S$ and containing $x$. If $x \in \Compl{S}$, we set $\DD1{S}(x) = 0$. The map $\DD1{S}$ is known as the opening function of $S$ (based on the $1$-distance): it allows to compute efficiently results of morphological openings by balls of various radius, and gives information on the local thickness of an object.
 
-Given $\complex{n}{X}$, the value of $\dd_1(x,\Compl{X})$ of every $x \in X$ can be computed by performing successive dilations of values of the map $d_1$. The algorithm presented in Alg.\ref{algo::naive_opening} is naive, and a more efficient implementation (linear in time depending on the image's size) is discussed in the appendix (see Sec.~\ref{sec::better_open}, p.~\pageref{sec::better_open}).
+Given $S \subset \Zset^n$, the value of $\DD1{S}(x)$ of every $x \in S$ can be naively computed by performing successive morphological dilations of values of the map $\Dist1{S}$. 
+%TODO Parler du fait que l'on a une version dans la thèse, et une version plus amélioré dans thèse et public avenir
 
-In order to extend $d_1$ and $\dd_1$ to the cubical complex framework, let us introduce the map $\Phi^{-1}$, inverse of the bijective map $\Phi$ defined in Sec.~\ref{sec::binary_to_cubic}. It is used to project any $n$-face of $\allfaces{n}$ into $\Zset^n$. We indifferently use $\Phi^{-1}$ as a map from $\subfaces{n}{n}$ to $\Zset^n$, and as a map from $\mathcal{P}(\subfaces{n}{n})$ to $\mathcal{P}(\Zset^n)$.
+Finally, we define the \myem{decenterness map} :
 
-Given $\complex{n}{X}$, we set $X^v = \Phi^{-1}(X \inter \subfaces{n}{n})$: the set $X^v$ is a subset of $\Zset^n$. We define the map $\tilde{D_1}(X): \allfaces{n} \rightarrow \Nset$ as an extension of $d_1$ to the cubical complex framework: for all $f \in \allfaces{n}$,
+\begin{definition}
+\label{def::decenterness_map}
+Given $S \subset \Zset^n$, the \myem{decenterness map of $S$} is the map $\decent{S} = \DD1{S} - \Dist1{S}$.
+\end{definition}
+
+In order to extend all these previous maps defined in $\Zset^n$ to the cubical complex framework, let us introduce the map $\Phi^{-1}$, inverse of the bijective map $\Phi : \subfaces{n}{n} \rightarrow \Zset^{n}$ defined in Sec.~\ref{sec::binary_to_cubic}. It is used to project any $n$-face of $\allfaces{n}$ into $\Zset^n$. We indifferently use $\Phi^{-1}$ as a map from $\subfaces{n}{n}$ to $\Zset^n$, and as a map from $\mathcal{P}(\subfaces{n}{n})$ to $\mathcal{P}(\Zset^n)$.
+
+Given $Y \subset \allfaces{n}$, we define the map $\cplDist1{Y}: \allfaces{n} \rightarrow \Nset$ as follows: for all $f \in \allfaces{n}$,
 
 \bigskip
 \begin{math}
-\tilde{D_1}(X)(f) = \left\{
+\cplDist1{Y}(f) = \left\{
 \begin{array}{ll}
-d_1(\Phi^{-1}(f),\Compl{X^v}) & \text{if $f$ is an $n$-face}\\
-\displaystyle \max_{g \in \contstrict{f}} \tilde{D_1}(X)(g) & \text{else}
+\Dist1{\Phi^{-1}(Y \inter \subfaces{n}{n})}(Phi^{-1}(f)) & \text{if $f$ is an $n$-face}\\
+\displaystyle \max_{g \in \contstrict{f} \inter \subfaces{n}{n}} \cplDist1{Y}(g) & \text{else}
 \end{array}
 \right.
 \end{math}
 
-The same way, we define $\tilde{\DD_1}(X): \allfaces{n} \rightarrow \Nset$ as an extension of $\dd_1$ to the cubical complex framework.
+Informally, if $f$ is a 3-face, then $\cplDist1{Y}(f)$ is the length of the shortest 1-path between the voxel \quotes{corresponding} to $f$ and the set of voxels corresponding to $Y$.
+The same way, we define $\cplDD1{Y}$ and $\cpldecent{Y}$.
+
 
 \subsection{Parameter-free thinning based on the lifespan, opening function and decenterness}
-Thanks to these notions, we can now define sets of faces that will help preserve the visual aspect of an object during thinning. First, let us define the decenterness of a complex as the map $\centerness(X) = \tilde{\DD_1}(X) - \tilde{D_1}(X)$. For each face of a complex $X$, the decenterness value of this face gives an information on how well a face is centered inside a visual feature of the object: the lower this value is, the better centered the face is. On Fig.~\ref{fig::globalopening}, we give an example of the decenterness map of a shape, where the highest values are represented by the darkest colours.
+As previously said, we add edges to the set $W$ of Alg.~\ref{algo::pardircollapse_v0} in order to retain, in the resulting curvilinear skeleton, important edges from the original object. Given a cubical complex $X$, if an edge of $X$ has a high decenterness value for $X$, then it is probably located too close to the border of $X$ and does not represent an interesting visual feature to preserve.
+%TODO ref vers image de decenterness
+On the other hand, if an edge has a high lifespan for $X$, then it means it was not removed quickly, after becoming a facet, by the thinning algorithm and might represent some precious visual information on the original object. An idea would be to keep, during thinning, all edges whose lifespan is superior to the decenterness value. Unfortunately, this strategy produces skeletons with many spurious branches in surfacic areas of the original object.
 
-Faces relevant of the visual aspect of a complex must have a high lifespan ("survive" long to the homotopic thinning process) and a low decenterness (is centered in the object). In a $3$-dimensional complex (resp. a $2$-dimensional complex), squares (resp. lines) whose lifespan is higher than the decenterness will be chosen as relevant of the surfacic (resp. curvilinear) parts of the complex.
-
-\begin{definition}
-Given $\complex{n}{X}$, the \myem{$k$-LC axis} (stands for "Lifespan Centerness") of $X$ is the set 
-
-\begin{center}
-$\axislc{k}(X) = \closure{\{f \in X$ $|$ $\dim(f)=k$ and $\lifespan{f}{X} > \centerness(X)(f)\}}$.
-\end{center}
-
-\end{definition}
-
-The LC-axis fails in selecting a good set of curves relevant of the curvilinear parts of a three-dimensional complex. Indeed, given a $3$-complex $X$, the set $\axislc{1}(X)$ contains generally too many curves. This happens because the algorithm $ParDirCollapse$ "takes more time" to eliminate lines than to eliminate squares in a $3$-complex. Consequently, lines of a $3$-complex tend to have a high lifespan even though they are not representative of any curvilinear part of the complex. The thicker is the input object, and the more important is the phenomenon. 
-
-Lines relevant of the curvilinear parts of a $3$-complex have a high lifespan and a low decenterness, especially in the thick parts of the complex. Lines whose lifespan is higher than the decenterness added to the local thickness of the complex will be relevant of the curvilinear parts of the complex.
-
-\begin{definition}
-Given $\complex{n}{X}$, the \myem{$k$-LOC axis} (stands for "Lifespan Opening Centerness") of $X$ is the set 
-
-\begin{center}
-$\axisloc{k}(X) = \closure{\{f \in X$ $|$ $\dim(f)=k$ and $\lifespan{f}{X} > \tilde{\DD_1}(X)(f) + \centerness(X)(f)\}}$.
-\end{center}
-\end{definition}
-
-
-The various sets previously defined represent faces which should be kept safe from deletion during homotopic thinning of a complex in order to obtain a pruned skeleton containing visual features from the original object. The set $\axislc{1}$ of a $2$-complex represents curvilinear parts to keep in this complex, the set $\axisloc{1}$ of a $3$-complex represents curvilinear parts to keep in this complex, and the set $\axislc{2}$ of a $3$-complex represents surfacic parts to keep in this complex.
-
-\begin{lemma}
-\label{lem::axis_subset_facet}
-Given $\complex{n}{X}$, for every $k<n$, $\axislc{k}(X) \subseteq CollapseFacet(X, \emptyset)$ and $\axisloc{k}(X) \subseteq CollapseFacet(X, \emptyset)$.
-\end{lemma}
-
-Lemma \ref{lem::axis_subset_facet} is straightforward once observed that $CollapseFacet(X, \emptyset)$ is indeed the set of $k$-faces of $X$ ($k<n$) which have a strictly positive lifespan in $X$. 
-Based on these sets, we propose three algorithms: one for computing a 1d skeleton from a bi-dimensional complex, one for computing a 2d skeleton (which can contain 1d parts) from a three-dimensional complex, and one for computing a curvilinear skeletons from a three-dimensional complex. This last algorithm should produce one-dimensional results (a set of lines) however, the output can be a two-dimensional complex.
+We can identify surfacic areas of a complex as zones where squares have a high lifespan. Therefore, in order to avoid spurious branches in surfacic areas, we need to make it harder for edges to appear in these zones. It can be achieved by deciding that an edge will be kept safe from deletion by the thinning algorithm if its lifespan is superior to the decenterness value plus the lifespan of squares \quotes{around} this edge. This leads us to proposing Alg.~\ref{algo::3d_curvskel}. 
 
 \begin{algorithm}[ht]
-\label{algo::3d_input_curv_skel}
-\SetKwFor{ForAll}{for all}{do}{end}
+\label{algo::3d_curvskel}
 \caption[CurvilinearSkeleton]{$CurvilinearSkeleton(X)$}
 \KwData{A cubical complex $\complex{3}{X}$}
-\KwResult{A cubical complex $\complex{3}{Y}$ such that $\dim{Y} \leq 2$}
-$W=\axisloc{1}(X)$\;
-$ParDirCollapse(X,W,+\infty)$\;
-\Return $X$\;
+\KwResult{A cubical complex $\complex{3}{Y}$}
+\lnl{curvskel:01} $W=\{f \in X | \lifespan{f}{X} > \cpldecent{X}(f) + \birth{f}{X} - \cplDist1{X}(f)$ and $\mydim{f}=1\}$\;
+\Return $ParDirCollapse(X,W,+\infty)$\;
 \end{algorithm}
 
-Algorithm \ref{algo::3d_input_curv_skel} produces as output a 2d or 1d complex, result of the homotopic thinning of a three-dimensional complex. The skeleton produced by this algorithm should be a set of lines describing the shape of the input, however, it may contain squares representative of the topology of the initial object (if the input complex contains a cavity, the skeleton will contain surfacic parts).
+In order to understand what was realised on line \ref{curvskel:01} of Alg.~\ref{algo::3d_curvskel}, we might point out that the birth date of an edge corresponds to the highest death date of the squares containing this edge. Moreover, the map $\cplDist1{X}$ gives, for all 3-faces of $X$, their death date (as the thinning algorithm naturally follows this map to eliminate cubes from a 3-complex). Therefore, for an edge $f$ of $X$, $\cplDist1{X}(f)$ informs us on the highest death date of cubes containing $f$, also equal to the highest birth date of squares containing $f$. In conclusion, $\birth{f}{X} - \cplDist1{X}(f)$ is an approximation of the lifespan of the squares containing $f$.
 
-Despite the use of constraint sets (sets of faces which should not be removed during thinning) in the three algorithms, they produce thin results. -> On peut simplement modifier algo pour y incorporer directement les elements a conserver pdt la skel...
 
+
+
+\input{pathtracint_application_skeleton}
+
+
+
+\bibliographystyle{splncs03}
+\bibliography{./bibli}
 
 
 \end{document}

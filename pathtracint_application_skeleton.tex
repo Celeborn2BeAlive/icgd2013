@@ -45,75 +45,72 @@ Path tracing is a global illumination algorithm that is able to render photo-rea
 
 \subsection{The path tracing}
 
-Let $O$ be the origin of the camera in the scene. For each pixel $P$ of the final image we search for the nearest intersection point $x$ of the ray $(O, \overrightarrow{OP} = -\Theta)$ with the scene. At this point, to obtain the luminosity, we must solve the rendering equation \cite{Ka86}. The rendering equation is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
+Let $O$ be the origin of the camera in the scene. For each pixel $P$ of the final image we search for the nearest intersection point $x$ of the ray $(O, \overrightarrow{OP} = -\Theta)$ with the scene. At this point, to obtain the luminosity, we must solve the rendering equation \cite{Ka86} which is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
 
 \begin{align*}
 L(x \rightarrow \Theta) = L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) cos(N_x, \Phi) d\omega_\Phi
 \end{align*}
 
-$L$ is the radiance (a radiometric quantity that represents luminosity) from point $x$ toward direction $\Theta$. $L_e$ is the emitted radiance that is not zero only on light sources. $r(x, \Phi)$ is the nearest visible point from $x$ in the direction $\Phi$. The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. Intuitively it represents the material properties of the surface at point $x$. A mirror doesn't reflect light the same manners a wall do, the BRDF encodes that.
+$L$ is the radiance (a radiometric quantity that represents luminosity) from point $x$ toward direction $\Theta$. $L_e$ is the emitted radiance that is not zero only on light sources. $r(x, \Phi)$ is the nearest visible point from $x$ in the direction $\Phi$ of the hemisphere $\Omega_x$. $N_x$ is the surface normal at point $x$. The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. Intuitively it represents the material properties of the surface at point $x$. A mirror does not reflect light the same manners a wall do and the BRDF describes that kind of behavior.
 
-This equation expresses an intuitive idea: the radiance $L$ produced by the point $x$ in the direction $\Theta$ is the sum of the emitted radiance and the reflected radiance.  The reflected radiance is computed by integrating the incoming radiance scaled by a factor $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$ over all the possible directions of the hemisphere around $x$. $N_x$ is the surface normal at point $x$.
+This equation expresses an intuitive idea: the radiance $L$ produced by the point $x$ in the direction $\Theta$ is the sum of the emitted radiance and the reflected radiance.  The reflected radiance is computed by integrating the incoming radiance scaled by a factor $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$ over all the possible directions of the hemisphere around $x$.
 
-In practice it is impossible to compute anatically the integral, it has to be estimated.
-The most commonly used method is the Monte-Carlo integration that provides the following estimator for the integral:
+The most commonly used method to compute the integral is the Monte-Carlo integration that provides the following estimator:
 \begin{equation*}
 \langle L_r(x \rightarrow \Theta) \rangle = \frac{f_r(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) cos(N_x, \Phi)}{p(\Phi)}
 \end{equation*}
 
-$p$ is a probability density function (pdf) that is used to sample $\Phi$, a direction of the hemisphere $\Omega_x$. This estimator is unbiased, it means that the expected value $E[\langle L_r(x \rightarrow \Theta) \rangle]$ is equal to $L_r(x \rightarrow \Theta)$. The variance of the estimator express its quality.
-The variance of the estimator depends on the choosen pdf $p$. Actually the best is to choose a pdf that matches the shape of the function to integrate (ie. give high density to samples that have high values for the function and low density to samples that have low values).
+where $p$ is a probability density function (pdf) that is used to sample $\Phi$. This estimator is unbiased, meaning that the expected value $E[\langle L_r(x \rightarrow \Theta) \rangle]$ is equal to $L_r(x \rightarrow \Theta)$. The variance of the estimator expresses its quality and depends on the choosen pdf $p$. Actually the best is to choose a pdf that matches the shape of the function to integrate (ie. give high density to samples that have high values for the function and low density to samples that have low values).
 
 This strategy of choosing an adapted pdf is called \myem{importance sampling} and is over-used in global illumination to improve the convergence of the algorithms.
 
-The implantation of $L$ is as follow: first we sample a random direction $\Phi$ based on the pdf $p$. Then we apply the estimator that call $L$ recursively to compute $L_r$. Then we return the sum of the emitted radiance $L_e$ and the result for $L_r$. The recursion stops when a maximal number of bounces have been reach.
+The algorithm to compute $L$ is as follow: first we sample a random direction $\Phi$ based on the pdf $p$. Then we apply the estimator that call $L$ recursively to compute $L_r$. Finally we return the sum of the emitted radiance $L_e$ and the result for $L_r$. The recursion stops when a maximal number of bounces has been reach.
 
-This algorithm is called for each pixel of the final image to compute. To improve the quality of the final image we can throw multiple rays accross each pixel and compute the mean of the results.
+This computation is done multiple time for each pixel (at different positions over the pixel). We average the results and get an estimation of the mean radiance passing through the pixel in direction of the camera's origin.
 
-In the radiance algorithm the $\Phi$ direction is sampled on $\Omega_x$ based on the pdf $p$. A bad pdf picks directions that don't reach the light before the end of the recursion and results in a lot of noise in the final image. We will discuss the choice of $p$ in the next section.
+In the radiance computation the $\Phi$ direction is sampled on $\Omega_x$ based on the pdf $p$. A bad pdf picks directions that don't reach the light before the end of the recursion and results in a lot of noise in the final image. We will discuss the choice of $p$ in the next section.
 
 \subsection{Skeleton based importance sampling}
 
-The key idea behind our method is that light travels in the void of the scene. A curvilinear skeleton of that void gives us enough informations to compute some importance directions that tells us where the light comes from. Given that directions we can construct a efficient pdf $p_{skel}$ and guide our rays by sampling the hemispheres with $p_{skel}$
+The key idea behind our method is that light travels in the void of the scene. As stated in the introduction, a curvilinear skeleton of the void gives us enough informations to compute some importance directions where light comes from. Given these directions we can construct a efficient pdf $p_{skel}$ and guide our rays by sampling the hemispheres with $p_{skel}$
 
-Here is the integrand of the integral estimated with Monte-Carlo:
+The integrand of $L_r$ is:
 
 \begin{equation*}
-f_r(x, \Phi, \Theta) L(x \leftarrow \Phi) cos(N_x, \Phi)
+f_r(x, \Theta \leftrightarrow \Phi) L(x \leftarrow \Phi) cos(N_x, \Phi)
 \end{equation*}
 
 It is a product of three functions that can be efficiently sample individually but that are hard to sample when they are combined. The most common strategy used to sample $\Omega_x$ is to use the BRDF (combined with the cosine) because we know it: it is given as an input of the algorithm, for exemple with textures.
 
-$L$ is rarelly used because we cannot evaluate it in constant time. Remember that it represents the distribution of light in the scene. It takes high values when $\Phi$ carries a lot of energy. Out method gives a way to sample according to $L$.
+$L$ is rarelly used because its evaluation cannot be done in constant time. Remember that it represents the distribution of light in the scene. It takes high values when $\Phi$ carries a lot of energy. Our method gives a way to sample according to $L$.
 
 \subsubsection{Construction of the importance points}
 
-The skeleton of the void is computed with our algorithm and is converted to a graph (the nodes are 3D positions and the edges represents the topology of the scene), given as an input of our path tracing. We then compute a set of points called \myem{importance points}. These points will be used to sample $\Omega_x$ in the path tracing algorithm. For each node of the skeleton $n$, one importance point $imp_n$ is computed.
+The skeleton of the void is computed with our algorithm \ref{sec::skeletonization} and is converted to a graph (the nodes are 3D positions and the edges represents the topology of the scene), given as an input of our path tracing. We then compute a set of points called \myem{importance points}. These points will be used to sample $\Omega_x$ in the path tracing algorithm. For each node of the skeleton $n$, one importance point $imp_n$ is computed.
 
 Let $L$ be a light of the scene ($L \in S_L$) and $n_L$ the shortest visible node by $L$. We first compute a tree of shortest paths along the skeleton with $n_L$ as root. We use the Dijkstra algorithm with a distance based on visibility from $n_L$: We put $d(n, m) = 1$ if $m$ is visible from $n_L$ and $d(n, m) = 10$ if not. It results that the paths that are enlighted by $L$ will have a shorter distance and will guide us to the light faster than the dark ones.
 
-Let $n$ be a node of the skeleton and $V_n$ the set of visible nodes from $n$ along the shortest path toward $n_L$. The importance point $imp_n$ associated to $n$ is computed by taking the barycenter of $V_n$.
+Let $n$ be a node of the skeleton and $V_n$ the set of visible nodes from $n$ along the shortest path toward $n_L$. The importance point $imp_n$ associated to $n$ is the barycenter of $V_n$.
 
 \subsubsection{Sampling according to $L$}
 
-Given a point $x$ and a direction $\Theta$ we want to compute $L(x \rightarrow \Theta)$ and then sample the hemisphere $\Omega_x$. We search for the nearest skeleton node $n$ and its importance point $imp_n$. We sample the hemisphere with a power-cosine pdf center on $\overrightarrow{ximp_n}$:
+Given a point $x$ and a direction $\Theta$ we want to compute $L(x \rightarrow \Theta)$ and then sample the hemisphere $\Omega_x$. We search for the nearest skeleton node $n$ and its importance point $imp_n$. We sample the hemisphere with a power-cosine pdf centered on $\overrightarrow{ximp_n}$:
 
 \begin{equation*}
 p_{skel}(\Phi) = \frac{s + 1}{2\pi} cos^s \alpha
 \end{equation*}
 
-with $\alpha$ the angle between $\overrightarrow{ximp_n}$ and $\Phi$ and $s$ a parameter called skeleton strength. The more $s$ is high, the more we sample close $\overrightarrow{ximp_n}$.
+with $\alpha$ the angle between $\overrightarrow{ximp_n}$ and $\Phi$, $s$ being a parameter called skeleton strength. The higher $s$ is, the more we sample close $\overrightarrow{ximp_n}$.
 
 \clearpage
 \subsection{Results and discussion}
 
-We present the results of our algorithm applied to four scenes. the first row shows our result and the second row shows a standard path tracing with the same input parameters. On each picture a MSE (mean square error) value with a reference image is shown.
+We present some results of our algorithm applied to four scenes. the first row shows our result and the second row shows a standard path tracing with the same input parameters. On each picture a MSE (mean square error) value with a reference image is shown.
 
 \begin{center}
-\hspace*{-40px}
-\includegraphics[scale=0.2]{images/four_scenes.png}
+\includegraphics[scale=0.17]{images/four_scenes.png}
 \end{center}
 
-We observe a net decreasing of the noise for our algorithm, especially in dark areas. The MSE values are lower for the top pictures, meaning that we converge faster to the reference image than standard path tracing does.
+We observe a decrease of the noise for our algorithm, especially in dark areas. The MSE values are lower for the top pictures, meaning that we converge faster to the reference image than standard path tracing does.
 
-We presented an application of our skeletonization algorithm for global illumination. Our strategy works well, it reduces noise by taking into account the distribution of energy in the scene. One of the problem is that we take into account only one importance direction for sampling, we totally ignore the BRDF and the cosine factor. A solution called Multiple Importance Sampling allow us to combine different strategies into one. We will not describe this strategy because it's not directly related to skeletonization, but it has allowed us to improve our results and remove some artifacts of our method.
+We presented an application of our skeletonization algorithm for global illumination. Our strategy works well, it reduces noise by taking into account the distribution of energy in the scene. One of the problem is that we take into account only one importance direction for sampling, totally ignoring the BRDF and the cosine factor. A solution called Multiple Importance Sampling will allow us to combine different strategies into one.

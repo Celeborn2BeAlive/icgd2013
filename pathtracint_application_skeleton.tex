@@ -45,14 +45,15 @@ Path tracing is a global illumination algorithm that is able to render photo-rea
 
 \subsection{The path tracing}
 
-A CHANGER : INTRODUIRE L'EQUATION DU RENDU : du genre : for each pixel we seek the intersection point. At this point, to obtain the luminosity, we must solve the rendering equation. The rendering equation is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
+Let $O$ be the origin of the camera in the scene. For each pixel $P$ of the final image we search for the nearest intersection point $x$ of the ray $(O, \overrightarrow{OP} = -\Theta)$ with the scene. At this point, to obtain the luminosity, we must solve the rendering equation. The rendering equation is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
 
 \begin{align*}
 L(x \rightarrow \Theta) = L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) cos(N_x, \Phi) d\omega_\Phi
 \end{align*}
-INTRODUIRE BRIEVEMENT la luminance du style : L being the light flux from point $x$ toward direction $\Theta$.
+
+$L$ is the radiance (a radiometric quantity that represents luminosity) from point $x$ toward direction $\Theta$. $L_e$ is the emitted radiance that is not zero only on light sources. $r(x, \Phi)$ is the nearest visible point from $x$ in the direction $\Phi$. The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. Intuitively it represents the material properties of the surface at point $x$. A mirror doesn't reflect light the same manners a wall do, the BRDF encodes that.
+
 This equation expresses an intuitive idea: the radiance $L$ produced by the point $x$ in the direction $\Theta$ is the sum of the emitted radiance and the reflected radiance.  The reflected radiance is computed by integrating the incoming radiance scaled by a factor $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$ over all the possible directions of the hemisphere around $x$. $N_x$ is the surface normal at point $x$.
-The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. Intuitively it represents the material properties of the surface at point $x$. A mirror doesn't reflect light the same manners a wall do, the BRDF encodes that.
 
 In practice it is impossible to compute anatically the integral, it has to be estimated. RAJOUT : cannot send rays everywhere.
 The most commonly used method is the Monte-Carlo integration that provides the following estimator for the integral:
@@ -105,6 +106,14 @@ p_{skel}(\Phi) = \frac{s + 1}{2\pi} cos^s \alpha
 with $\alpha$ the angle between $\overrightarrow{ximp_n}$ and $\Phi$ and $s$ a parameter called skeleton strength. The more $s$ is high, the more we sample close $\overrightarrow{ximp_n}$.
 
 \subsubsection{Results}
+
+Here is a result of our algorithm:
+
+\begin{center}
+\includegraphics[scale=0.2]{images/skel_based_rt.png}
+\end{center}
+
+We observe a net decreasing of the noise: we get a faster convergence to the true image.
 
 \subsection{Discussion}
 

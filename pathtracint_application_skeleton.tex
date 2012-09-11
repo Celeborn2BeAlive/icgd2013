@@ -1,100 +1,76 @@
-
-
 \section{Application to path tracing}
 
-Path tracing is a global illumination algorithm that is able to render photo-realistic images of a virtual scene viewed by a camera. The idea behind the algorithm is very simple: for each pixel of the image, throw rays through the pixel that will bounce on the scene to accumulate lighting exchanges. In order to get fast convergence the rays must be efficiently distributed through the scene, toward the lights. Our idea is to use a curvilinear skeleton of the void of the scene to guide the rays in the correct direction. We start by defining some useful concepts related to path tracing and we present our skeleton based path tracing algorithm.
+Path tracing is a global illumination algorithm that is able to render photo-realistic images of a virtual scene viewed by a camera. The idea behind the algorithm is very elegant: for each pixel of the image, throw rays through the pixel that will bounce on the scene to accumulate lighting exchanges. In order to get fast convergence the rays must be efficiently distributed through the scene, toward the lights. Our idea is to use a curvilinear skeleton of the void of the scene to guide the rays in the correct direction. We start by defining some useful concepts related to path tracing and we present our skeleton based path tracing algorithm.
 
-\subsection{Basic definitions of radiometry}
+%\subsection{Basic definitions of radiometry}
+%
+%Let $S$ be a set of surfaces of $\Rset^3$ that don't overlap and $S_L \subset S$ a set of surface lights. $S$ is called the scene.
+%
+%The basic radiometric quantity is the \myem{radiance} $L(x \rightarrow \Theta)$ that expresses the quantity of light energy produced by the surface point $x \in \Rset^3$ toward direction $\Theta \in \Omega_x$ per unit of time per unit area per unit solid angle (expressed in $W.m^{-2}.sr^{-1}$).
+%This is the quantity that the eye actually "sees" and that must be computed for each pixel of the final image.
+%
+%% image radiance
+%
+%We can define another quantity related to radiance called \myem{incoming radiance} $L(x \leftarrow \Phi)$ that represents the radiance that reach $x$ from direction $\Phi$.
+%
+%In the void, incoming radiance can be written in terms of radiance as follow:
+%
+%\begin{equation*}
+%L(x \leftarrow \Phi) = L(r(x, \Phi) \rightarrow -\Phi)
+%\end{equation*}
+%
+%$r(x, \Phi)$ is the surface point seen by $x$ in the direction $\Phi$. It can be defined formally by:
+%
+%\begin{align*}
+%r(x, \Phi) &= x + t_{min}\Phi \\
+%t_{min} &= min \lbrace t \in (0, +\infty]~ |~ x + t\Phi \in S \rbrace
+%\end{align*}
+%
+%If $t_{min} = \infty$ then $r(x, \Phi)$ is undefined and $L(x \leftarrow \Phi) = 0$. We call $r$ the \myem{raytrace} function. In practice it is implemented by throwing a ray in the scene and looking for the first intersection.
+%
+%A third quantity related to radiance is \myem{emitted radiance} $L_e(x \rightarrow \Theta)$. It is not null if $x$ is a point of a light source ($x \in S_L$). In practice the emitted radiance is given with the set $S_L$ as an input of the algorithm.
+%
+%The radiance is the solution of an equation called the Rendering Equation:
+%
+%\begin{align*}
+%L(x \rightarrow \Theta) &= L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(x \leftarrow \Phi) cos(N_x, \Phi) d\omega_\Phi \\
+%&= L_e(x \rightarrow \Theta) + L_r(x \rightarrow \Theta)
+%\end{align*}
+%
+%This equation expresses an intuitive idea: the radiance produced by the point $x$ in the direction $\Theta$ is the sum of the emitted radiance and the reflected radiance.  The reflected radiance is computed by integrating the incoming radiance scaled by a factor $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$ over all the possible directions of the hemisphere around $x$. $N_x$ is the surface normal at point $x$.
+%
+%The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. Intuitively it represents the material properties of the surface at point $x$. A mirror doesn't reflect light the same manners a wall do, the BRDF encodes that.
+%
+%It's actually the rendering equation that a path tracer try to resolve. Let $O$ be the origin of the camera and $I$ the image we want to compute (a rectangle embedded in $\Rset^3$). Then the path tracing algorithm compute an approximation of the radiances $L(O \leftarrow \vec{OP})$, $\forall P \in I$.
 
-Let $S$ be a set of surfaces of $\Rset^3$ that don't overlap and $S_L \subset S$ a set of surface lights. $S$ is called the scene.
+\subsection{The path tracing}
 
-The basic radiometric quantity is the \myem{radiance} $L(x \rightarrow \Theta)$ that expresses the quantity of light energy produced by the surface point $x \in \Rset^3$ toward direction $\Theta \in \Omega_x$ per unit of time per unit area per unit solid angle (expressed in $W.m^{-2}.sr^{-1}$).
-This is the quantity that the eye actually "sees" and that must be computed for each pixel of the final image.
-
-% image radiance
-
-We can define another quantity related to radiance called \myem{incoming radiance} $L(x \leftarrow \Phi)$ that represents the radiance that reach $x$ from direction $\Phi$.
-
-In the void, incoming radiance can be written in terms of radiance as follow:
-
-\begin{equation*}
-L(x \leftarrow \Phi) = L(r(x, \Phi) \rightarrow -\Phi)
-\end{equation*}
-
-$r(x, \Phi)$ is the surface point seen by $x$ in the direction $\Phi$. It can be defined formally by:
-
-\begin{align*}
-r(x, \Phi) &= x + t_{min}\Phi \\
-t_{min} &= min \lbrace t \in (0, +\infty]~ |~ x + t\Phi \in S \rbrace
-\end{align*}
-
-If $t_{min} = \infty$ then $r(x, \Phi)$ is undefined and $L(x \leftarrow \Phi) = 0$. We call $r$ the \myem{raytrace} function. In practice it is implemented by throwing a ray in the scene and looking for the first intersection.
-
-A third quantity related to radiance is \myem{emitted radiance} $L_e(x \rightarrow \Theta)$. It is not null if $x$ is a point of a light source ($x \in S_L$). In practice the emitted radiance is given with the set $S_L$ as an input of the algorithm.
-
-The radiance is the solution of an equation called the Rendering Equation:
-
-\begin{align*}
-L(x \rightarrow \Theta) &= L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(x \leftarrow \Phi) cos(N_x, \Phi) d\omega_\Phi \\
-&= L_e(x \rightarrow \Theta) + L_r(x \rightarrow \Theta)
-\end{align*}
-
-This equation expresses an intuitive idea: the radiance produced by the point $x$ in the direction $\Theta$ is the sum of the emitted radiance and the reflected radiance.  The reflected radiance is computed by integrating the incoming radiance scaled by a factor $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$ over all the possible directions of the hemisphere around $x$. $N_x$ is the surface normal at point $x$.
-
-The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. Intuitively it represents the material properties of the surface at point $x$. A mirror doesn't reflect light the same manners a wall do, the BRDF encodes that.
-
-It's actually the rendering equation that a path tracer try to resolve. Let $O$ be the origin of the camera and $I$ the image we want to compute (a rectangle embedded in $\Rset^3$). Then the path tracing algorithm compute an approximation of the radiances $L(O \leftarrow \vec{OP})$, $\forall P \in I$.
-
-\subsection{Solving the rendering equation}
-
-The rendering equation is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
+A CHANGER : INTRODUIRE L'EQUATION DU RENDU : du genre : for each pixel we seek the intersection point. At this point, to obtain the luminosity, we must solve the rendering equation. The rendering equation is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
 
 \begin{align*}
 L(x \rightarrow \Theta) = L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) cos(N_x, \Phi) d\omega_\Phi
 \end{align*}
+INTRODUIRE BRIEVEMENT la luminance du style : L being the light flux from point $x$ toward direction $\Theta$.
+This equation expresses an intuitive idea: the radiance $L$ produced by the point $x$ in the direction $\Theta$ is the sum of the emitted radiance and the reflected radiance.  The reflected radiance is computed by integrating the incoming radiance scaled by a factor $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$ over all the possible directions of the hemisphere around $x$. $N_x$ is the surface normal at point $x$.
+The $f_r$ function is called the \myem{bidirectional reflectance function} (BRDF) and express the exchange of radiance between the incoming direction $\Phi$ and the output direction $\Theta$. Intuitively it represents the material properties of the surface at point $x$. A mirror doesn't reflect light the same manners a wall do, the BRDF encodes that.
 
-In practive it is impossible to compute anatically the integral, it has to be estimated. The most commonly used method is the Monte-Carlo integration that provide the following estimator for the integral:
-
+In practice it is impossible to compute anatically the integral, it has to be estimated. RAJOUT : cannot send rays everywhere.
+The most commonly used method is the Monte-Carlo integration that provides the following estimator for the integral:
 \begin{equation*}
 \langle L_r(x \rightarrow \Theta) \rangle = \frac{f_r(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) cos(N_x, \Phi)}{p(\Phi)}
 \end{equation*}
 
-$p$ is a probability density function (pdf) that is used to sample $\Phi$, a direction of the hemisphere $\Omega_x$. This estimator is unbiased, it means that the expected value $E[\langle L_r(x \rightarrow \Theta) \rangle]$ is equal to $L_r(x \rightarrow \Theta)$. The variance of the estimator express its quality. The lower the variance is, the better is the estimator. We have:
+$p$ is a probability density function (pdf) that is used to sample $\Phi$, a direction of the hemisphere $\Omega_x$. This estimator is unbiased, it means that the expected value $E[\langle L_r(x \rightarrow \Theta) \rangle]$ is equal to $L_r(x \rightarrow \Theta)$. The variance of the estimator express its quality.
+The variance clearly depends on the choosen pdf $p$. Actually the best is to choose a pdf that matches the shape of the function to integrate (ie. give high density to samples that have high values for the function and low density to samples that have low values).
 
-\begin{equation*}
-\sigma^2[\langle L_r(x \rightarrow \Theta) \rangle] = \int_{\Omega_x} (\frac{f(\Phi)}{p(\Phi)} - L_r(x \rightarrow \Theta))^2 d\omega_\Phi
-\end{equation*}
+This strategy of choosing an adapted pdf is called \myem{importance sampling} and is over-used in global illumination to improve the convergence of the algorithms.
 
-The variance clearly depends on the choosen pdf $p$. Actually the best is to choose a pdf that match the shape of the function to integrate (ie. give high density to samples that have high values for the function and low density to samples that have low values).
-
-This str	ategy of choosing an adapted pdf is called \myem{importance sampling} and is over-used in global illumination to improve the convergence of the algorithms.
-
-\subsection{The path tracing algorithm}
-
-\begin{algorithm}[h!]
-\label{algo::incoming_radiance}
-\caption[incoming_radiance]{Incoming radiance $L(x \leftarrow \Phi)$}
-\KwData{An incoming direction $\Phi$, a point $x$} 
-\KwResult{$L(x \leftarrow \Phi)$}
-\Return $L(r(x, \Phi) \rightarrow -\Phi)$\;
-\end{algorithm}
-
-\begin{algorithm}[h!]
-\label{algo::radiance}
-\caption[radiance]{Radiance $L(x \rightarrow \Theta)$}
-\KwData{An outcoming direction $\Theta$, a point $x$} 
-\KwResult{$L(x \rightarrow \Theta)$}
-$L \gets L_e(x \rightarrow \Theta)$\;
-\If{continue the recursion} {
-	$\Phi \gets sample(\Omega_x, p)$ \\
-	$L \gets L + \frac{f_r(x, \Phi, \Theta) L(x \leftarrow \Phi) cos(N_x, \Phi)}{p(\Phi)}$\;
-}
-\Return L\;
-\end{algorithm}
-
+INTRODUIRE BRIEVEMENT L'ALGORITHME...
 This algorithm is called for each pixel of the final image to compute. To improve the quality of the result we can throw multiple rays accross each pixel and computing the mean of the results.
 
 In the radiance algorithm the $\Phi$ direction is sampled on $\Omega_x$ based on the pdf $p$. We will discuss what pdf we use in the next section.
+
+PARLER DE RAYON QUI TOUCHE PAS LUMIERE + BRUIT
 
 \subsection{Skeleton based importance sampling}
 
@@ -106,7 +82,7 @@ Here is the integrand of the integral estimated with Monte-Carlo:
 f_r(x, \Phi, \Theta) L(x \leftarrow \Phi) cos(N_x, \Phi)
 \end{equation*}
 
-It's a product of three functions that can be efficiently sample individually but that are hard to sample when they are combined. The most common strategy used to sample $\Omega_x$ is to use the BRDF (combined with the cosine) because we know it: it is given as an input of the algorithm, for exemple with textures.
+It is a product of three functions that can be efficiently sample individually but that are hard to sample when they are combined. The most common strategy used to sample $\Omega_x$ is to use the BRDF (combined with the cosine) because we know it: it is given as an input of the algorithm, for exemple with textures.
 
 $L$ is rarelly used because we cannot evaluate it in constant time. Remember that it represents the distribution of light in the scene. It takes high values when $\Phi$ carries a lot of energy. Out method gives a way to sample according to $L$.
 

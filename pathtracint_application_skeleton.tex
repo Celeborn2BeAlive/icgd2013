@@ -45,7 +45,7 @@ Path tracing is a global illumination algorithm that is able to render photo-rea
 
 \subsection{The path tracing}
 
-Let $O$ be the origin of the camera in the scene. For each pixel $P$ of the final image we search for the nearest intersection point $x$ of the ray $(O, \overrightarrow{OP} = -\Theta)$ with the scene. At this point, to obtain the luminosity, we must solve the rendering equation. The rendering equation is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
+Let $O$ be the origin of the camera in the scene. For each pixel $P$ of the final image we search for the nearest intersection point $x$ of the ray $(O, \overrightarrow{OP} = -\Theta)$ with the scene. At this point, to obtain the luminosity, we must solve the rendering equation \cite{Ka86}. The rendering equation is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
 
 \begin{align*}
 L(x \rightarrow \Theta) = L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_r(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) cos(N_x, \Phi) d\omega_\Phi
@@ -55,7 +55,7 @@ $L$ is the radiance (a radiometric quantity that represents luminosity) from poi
 
 This equation expresses an intuitive idea: the radiance $L$ produced by the point $x$ in the direction $\Theta$ is the sum of the emitted radiance and the reflected radiance.  The reflected radiance is computed by integrating the incoming radiance scaled by a factor $f_r(x, \Theta \leftrightarrow \Phi) cos(N_x, \Phi)$ over all the possible directions of the hemisphere around $x$. $N_x$ is the surface normal at point $x$.
 
-In practice it is impossible to compute anatically the integral, it has to be estimated. RAJOUT : cannot send rays everywhere.
+In practice it is impossible to compute anatically the integral, it has to be estimated.
 The most commonly used method is the Monte-Carlo integration that provides the following estimator for the integral:
 \begin{equation*}
 \langle L_r(x \rightarrow \Theta) \rangle = \frac{f_r(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) cos(N_x, \Phi)}{p(\Phi)}
@@ -104,16 +104,16 @@ p_{skel}(\Phi) = \frac{s + 1}{2\pi} cos^s \alpha
 
 with $\alpha$ the angle between $\overrightarrow{ximp_n}$ and $\Phi$ and $s$ a parameter called skeleton strength. The more $s$ is high, the more we sample close $\overrightarrow{ximp_n}$.
 
-\subsubsection{Results}
+\clearpage
+\subsection{Results and discussion}
 
-Here is a result of our algorithm:
+We present the results of our algorithm applied to four scenes. the first row shows our result and the second row shows a standard path tracing with the same input parameters. On each picture a MSE (mean square error) value with a reference image is shown.
 
 \begin{center}
-\includegraphics[scale=0.2]{images/skel_based_rt.png}
+\hspace*{-40px}
+\includegraphics[scale=0.2]{images/four_scenes.png}
 \end{center}
 
-We observe a net decreasing of the noise: we get a faster convergence to the true image.
+We observe a net decreasing of the noise for our algorithm, especially in dark areas. The MSE values are lower for the top pictures, meaning that we converge faster to the reference image than standard path tracing does.
 
-\subsection{Discussion}
-
-We presented an application of our skeletonization algorithm for global illumination. Our strategy work wells, especially in dark areas. It reduces noise by taking into account the distribution of energy in the scene. One of the problem is that we take into account only one importance direction for sampling, we totally ignore the BRDF and the cosine factor. A solution called Multiple Importance Sampling allow us to combine different strategies into one. We will not describe this strategy because it's not directly related to skeletonization, but it have allowed us to improve our results and remove some artifact of our method.
+We presented an application of our skeletonization algorithm for global illumination. Our strategy works well, it reduces noise by taking into account the distribution of energy in the scene. One of the problem is that we take into account only one importance direction for sampling, we totally ignore the BRDF and the cosine factor. A solution called Multiple Importance Sampling allow us to combine different strategies into one. We will not describe this strategy because it's not directly related to skeletonization, but it has allowed us to improve our results and remove some artifacts of our method.

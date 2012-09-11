@@ -62,16 +62,15 @@ The most commonly used method is the Monte-Carlo integration that provides the f
 \end{equation*}
 
 $p$ is a probability density function (pdf) that is used to sample $\Phi$, a direction of the hemisphere $\Omega_x$. This estimator is unbiased, it means that the expected value $E[\langle L_r(x \rightarrow \Theta) \rangle]$ is equal to $L_r(x \rightarrow \Theta)$. The variance of the estimator express its quality.
-The variance clearly depends on the choosen pdf $p$. Actually the best is to choose a pdf that matches the shape of the function to integrate (ie. give high density to samples that have high values for the function and low density to samples that have low values).
+The variance of the estimator depends on the choosen pdf $p$. Actually the best is to choose a pdf that matches the shape of the function to integrate (ie. give high density to samples that have high values for the function and low density to samples that have low values).
 
 This strategy of choosing an adapted pdf is called \myem{importance sampling} and is over-used in global illumination to improve the convergence of the algorithms.
 
-INTRODUIRE BRIEVEMENT L'ALGORITHME...
-This algorithm is called for each pixel of the final image to compute. To improve the quality of the result we can throw multiple rays accross each pixel and computing the mean of the results.
+The implantation of $L$ is as follow: first we sample a random direction $\Phi$ based on the pdf $p$. Then we apply the estimator that call $L$ recursively to compute $L_r$. Then we return the sum of the emitted radiance $L_e$ and the result for $L_r$. The recursion stops when a maximal number of bounces have been reach.
 
-In the radiance algorithm the $\Phi$ direction is sampled on $\Omega_x$ based on the pdf $p$. We will discuss what pdf we use in the next section.
+This algorithm is called for each pixel of the final image to compute. To improve the quality of the final image we can throw multiple rays accross each pixel and compute the mean of the results.
 
-PARLER DE RAYON QUI TOUCHE PAS LUMIERE + BRUIT
+In the radiance algorithm the $\Phi$ direction is sampled on $\Omega_x$ based on the pdf $p$. A bad pdf picks directions that don't reach the light before the end of the recursion and results in a lot of noise in the final image. We will discuss the choice of $p$ in the next section.
 
 \subsection{Skeleton based importance sampling}
 

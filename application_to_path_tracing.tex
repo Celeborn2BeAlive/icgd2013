@@ -86,7 +86,7 @@ $L$ is rarelly used because its evaluation cannot be done in constant time. Reme
 
 \subsubsection{Construction of the importance points}
 
-The skeleton of the void is computed with our algorithm \ref{sec::skeletonization} and is converted to a graph (the nodes are 3D positions and the edges represents the topology of the scene), given as an input of our path tracing. We then compute a set of points called \myem{importance points}. These points will be used to sample $\Omega_x$ in the path tracing algorithm. For each node of the skeleton $n$, one importance point $imp_n$ is computed.
+The skeleton of the void is computed with our algorithm (section \ref{sec::skeletonization}) and is converted to a graph (the nodes are 3D positions and the edges represents the topology of the scene), given as an input of our path tracing. We then compute a set of points called \myem{importance points}. These points will be used to sample $\Omega_x$ in the path tracing algorithm. For each node of the skeleton $n$, one importance point $imp_n$ is computed.
 
 Let $L$ be a light of the scene ($L \in S_L$) and $n_L$ the shortest visible node by $L$. We first compute a tree of shortest paths along the skeleton with $n_L$ as root. We use the Dijkstra algorithm with a distance based on visibility from $n_L$: We put $d(n, m) = 1$ if $m$ is visible from $n_L$ and $d(n, m) = 10$ if not. It results that the paths that are enlighted by $L$ will have a shorter distance and will guide us to the light faster than the dark ones.
 

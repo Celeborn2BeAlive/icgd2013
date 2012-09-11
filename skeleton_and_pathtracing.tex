@@ -1,9 +1,9 @@
 \documentclass[final,envcountsame]{llncs}
 
 
-%\usepackage{graphicx} %Pouvoir insérer des images
+%\usepackage{graphicx} %Pouvoir insï¿½rer des images
 \usepackage{epsfig}
-\usepackage{amsmath} %Permet d'utiliser une jolie panoplie de symboles mathématiques
+\usepackage{amsmath} %Permet d'utiliser une jolie panoplie de symboles mathï¿½matiques
 \usepackage{amssymb}
 %\usepackage{amsthm}
 \usepackage{stmaryrd}
@@ -11,9 +11,6 @@
 \usepackage{amsfonts}
 
 
-\def\axisloc#1{\mathcal{LOC}_{#1}}
-\def\axislocbis#1#2{\mathcal{LOC}_{#1}^{>#2}}
-\def\axislc#1{\mathcal{LC}_{#1}}
 \newcommand{\centerness}{Decenter}
 
 \def\OneBall#1{\mathbb{B}^{1}_{#1}}
@@ -41,6 +38,7 @@
 \def\lifespan#1#2{Lifespan_{#2}(#1)}
 
 
+\def\V2C{\Psi}
 \def\Nset{\mathbb{N}}
 \def\Zset{\Z}
 \def\Nset{\mathbb{N}}
@@ -136,7 +134,7 @@ A face $f \in X$ is \myem{a facet of $X$} if $f$ is not a proper face of any fac
 
 Traditionally, a binary image is a finite subset of $\Zset^n$ (called voxel image when $n=3$). We give now a simple way to transpose such image to the cubical complex framework.
 
-To do so, we associate to each element of $S\subseteq \Zset^n$ an n-face of $\allfaces{n}$. More precisely, let $x=(x_1,...,x_n) \in S$, we define the n-face $\Phi(x) = \{x_1, x_1 + 1\} \times \ldots \times \{x_n, x_n + 1\}$. We can extend the map $\Phi$ to sets: $\Phi(S)=\{\Phi(x) | x \in S\}$. Given a set $S \subset \Zset^n$, we associate to it the cubical complex $\closure{\Phi(S)}$.
+To do so, we associate to each element of $S\subseteq \Zset^n$ an n-face of $\allfaces{n}$. More precisely, let $x=(x_1,...,x_n) \in S$, we define the n-face $\V2C(x) = \{x_1, x_1 + 1\} \times \ldots \times \{x_n, x_n + 1\}$. We can extend the map $\V2C$ to sets: $\V2C(S)=\{\V2C(x) | x \in S\}$. Given a set $S \subset \Zset^n$, we associate to it the cubical complex $\closure{\V2C(S)}$.
 
 
 \subsection{Thinning: the collapse operation}
@@ -155,7 +153,6 @@ Let $\complex{n}{Y}$, the complex $X$ \myem{collapses onto} $Y$ if there exists 
 \end{definition}
 
 \section{A parallel directional thinning based on cubical complex}
-\label{sec::skeletonization}
 
 \subsection{Removing free pairs in parallel}
 In the cubical complex framework, parallel removal of simple pairs can be easily achieved when following simple rules that we give now. First, we need to define the \myem{direction} and the \myem{orientation} of a free face.
@@ -230,15 +227,19 @@ On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, on
 
 
 Different definitions of the orientation and direction can be given, corresponding to different order of removal of free faces in the complex and leading to different results.
-Algorithm~\ref{algo::pardircollapse_v0} can be implemented to run in linear time complexity (proportionally to the number of faces of the complex). Indeed, checking if a face is free or not may be easily done in constant time. Moreover, when a free pair $(f,g)$ is removed from the input complex, it is sufficient to scan the elements of $(\cellstrict{f} \union \contstrict{g})$ in order to find new free faces.
+Algorithm~\ref{algo::pardircollapse_v0} can be implemented to run in linear time complexity (proportionally to the number of faces of the complex). Indeed, checking if a face is free or not may be easily done in constant time. Moreover, when a free pair $(f,g)$ is removed from the input complex, it is sufficient to scan the elements of $\cellstrict{f}$ in order to find new free faces.
 
 
 
 \section{Aspect preservation during thinning: a parameter-free method}
 \label{sec::aspect_no_param}
-Algorithm \ref{algo::pardircollapse_v0} does not necessarily preserves "geometrical information" from the original object in the resulting skeleton. For example, if the input was a filled human shape (one connected component, no tunnel nor cavity) and that $W=\emptyset$ and $l=+\inf$, then the result of Alg.~\ref{algo::pardircollapse_v0} would be a simple vertex. However, when one wants to preserve "geometrical information" from the original shape in the skeleton, then one expects to obtain a "stickman" from a human shape. It is however important to not retain "too much information" during thinning in order to avoid noisy branches in the skeleton.
+As previously said, our goal is to use the skeleton of a scene in order to guide light rays from the camera of the scene towards the light. In order to achieve this objective, we need a skeleton which \quotes{looks like} the original scene it was calculated from. 
 
-In the following, we will see a new method in the cubical complex, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory visual properties. This will be achieved by adding, in the set $W$ of Alg.~\ref{algo::pardircollapse_v0}, some faces from the original object during the thinning process.
+For example, if the input is a corridor (the void of the corridor), then the skeleton should be a line following the main direction of the corridor. 
+However, Alg.~\ref{algo::pardircollapse_v0} does not necessarily preserve "geometrical features" of the input object in the resulting skeleton, which end up being a single vertex.
+Moreover, when one wants to preserve "geometrical information" from the original shape in the skeleton, then it is important to not retain "too much information" during thinning in order to avoid noisy branches in the skeleton.
+
+In the following, we give a new method requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory visual properties. This will be achieved by adding, in the set $W$ of Alg.~\ref{algo::pardircollapse_v0}, some faces from the original object during the thinning process.
 
 \subsection{The lifespan of a face}
 In the following, we define more notions in the cubical complex. The first one we present is the \myem{death date} of a face.
@@ -282,30 +283,30 @@ In addition to the lifespan of a face, the proposed homotopic thinning method us
 
 Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal or inferior to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. Remark that $d_1$ is indeed the $6$-distance in the 3d voxel framework.
 
-We set $\dist1(x,y)$ as the length of the shortest $1$-path from $x$ to $y$. Let $S \subset \Zset^n$, we set, for all $x \in Zset^n$, the map $\Dist1{S}: \Zset^n \rightarrow \Nset$ such that $\Dist1{S}(x) = \displaystyle \min_{y \in \Compl{S}} \dist1(x,y)$. 
+We set $\dist1(x,y)$ as the length of the shortest $1$-path from $x$ to $y$. Let $S \subset \Zset^n$, we set, for all $x \in \Zset^n$, the map $\Dist1{S}: \Zset^n \rightarrow \Nset$ such that $\Dist1{S}(x) = \displaystyle \min_{y \in \Compl{S}} \dist1(x,y)$. 
 
 The \myem{maximal $1$-ball of $S$ centered on $x$} is the set $\MaxOneBall{S}(x)=\{y \in \Zset^n | \dist1(x,y) < \Dist1{S}(x)\}$.
 We set, for all $x \in S$, the map $\DD1{S}: \Zset^n \rightarrow \Nset$ such that $\DD1{S}(x) = \displaystyle \max_{x \in \MaxOneBall{S}(y)} \Dist1{S}(y)$: this value indicates the radius of the largest maximal $1$-ball contained in $S$ and containing $x$. If $x \in \Compl{S}$, we set $\DD1{S}(x) = 0$. The map $\DD1{S}$ is known as the opening function of $S$ (based on the $1$-distance): it allows to compute efficiently results of morphological openings by balls of various radius, and gives information on the local thickness of an object.
 
 Given $S \subset \Zset^n$, the value of $\DD1{S}(x)$ of every $x \in S$ can be naively computed by performing successive morphological dilations of values of the map $\Dist1{S}$. 
-%TODO Parler du fait que l'on a une version dans la thèse, et une version plus amélioré dans thèse et public avenir
+%TODO Parler du fait que l'on a une version dans la thï¿½se, et une version plus amï¿½liorï¿½ dans thï¿½se et public avenir
 
-Finally, we define the \myem{decenterness map} :
+Finally, we define the \myem{decenterness map}:
 
 \begin{definition}
 \label{def::decenterness_map}
 Given $S \subset \Zset^n$, the \myem{decenterness map of $S$} is the map $\decent{S} = \DD1{S} - \Dist1{S}$.
 \end{definition}
 
-In order to extend all these previous maps defined in $\Zset^n$ to the cubical complex framework, let us introduce the map $\Phi^{-1}$, inverse of the bijective map $\Phi : \subfaces{n}{n} \rightarrow \Zset^{n}$ defined in Sec.~\ref{sec::binary_to_cubic}. It is used to project any $n$-face of $\allfaces{n}$ into $\Zset^n$. We indifferently use $\Phi^{-1}$ as a map from $\subfaces{n}{n}$ to $\Zset^n$, and as a map from $\mathcal{P}(\subfaces{n}{n})$ to $\mathcal{P}(\Zset^n)$.
+In order to extend all these previous maps defined in $\Zset^n$ to the cubical complex framework, let us introduce the map $\V2C^{-1}$, inverse of the bijective map $\V2C : \Zset^{n} \rightarrow \subfaces{n}{n}$ defined in Sec.~\ref{sec::binary_to_cubic}. It is used to project any $n$-face of $\allfaces{n}$ into $\Zset^n$. We indifferently use $\V2C^{-1}$ as a map from $\subfaces{n}{n}$ to $\Zset^n$, and as a map from $\mathcal{P}(\subfaces{n}{n})$ to $\mathcal{P}(\Zset^n)$.
 
-Given $Y \subset \allfaces{n}$, we define the map $\cplDist1{Y}: \allfaces{n} \rightarrow \Nset$ as follows: for all $f \in \allfaces{n}$,
+Given $Y \subset \allfaces{n}$, we set $S = \V2C^{-1}(Y \inter \subfaces{n}{n})$. We define the map $\cplDist1{Y}: \allfaces{n} \rightarrow \Nset$ as follows: for all $f \in \allfaces{n}$,
 
 \bigskip
 \begin{math}
 \cplDist1{Y}(f) = \left\{
 \begin{array}{ll}
-\Dist1{\Phi^{-1}(Y \inter \subfaces{n}{n})}(Phi^{-1}(f)) & \text{if $f$ is an $n$-face}\\
+\Dist1{S}(\V2C^{-1}(f)) & \text{if $f$ is an $n$-face}\\
 \displaystyle \max_{g \in \contstrict{f} \inter \subfaces{n}{n}} \cplDist1{Y}(g) & \text{else}
 \end{array}
 \right.

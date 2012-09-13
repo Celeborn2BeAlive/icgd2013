@@ -66,9 +66,10 @@
 \def\Zhalf{\frac{\mathbb{Z}}{2}}
 \newcommand{\Card}[1]{|#1|}
 
-\def\figpath#1{../../Images/EPS/#1}
+\def\figpath{./images}
 
-
+\def\figpath{images}
+\def\myincludegraphics#1#2{\includegraphics[width=#1]{\figpath/#2}}
 
 
 
@@ -87,7 +88,7 @@ Universit\'{e} Paris Est, LIGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, Cit\'{
 
 
 \begin{abstract}
-What we propose is really great...
+We present a novel 3d curvilinear skeletonization algorithm which produces filtered skeletons without needing any user input, thanks to a new parallel algorithm based on the cubical complex framework. We then propose a new path tracing algorithm which uses such curvilinear skeleton in order to produce less noisy images in less time than the classical approach.
 \end{abstract}
 
 
@@ -189,9 +190,9 @@ Let $\complex{n}{X}$, and let $(f_1,g_1) \ldots (f_m,g_m)$ be $m$ distinct free 
 Intuitively, we want our thinning algorithm to remove free faces of a complex \quotes{layer by layer} and to avoid having unequal thinning of the input complex. Therefore, we want each execution of the algorithm to remove free faces located on the border of the input complex. 
 We define $\border{X}$ as the set all faces belonging to a free pair for $X$. We now introduce Alg.~\ref{algo::pardircollapse_v0}, a directional parallel thinning algorithm.
 
-On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, only faces located on the border of the complex are removed (l.~\ref{pc:07}). Thanks to corollary \ref{cor:parallel_removal_v2}, we can remove faces with same direction and orientation in parallel (l.~\ref{pc:08}), while guaranteeing topology preservation.
+On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, only faces located on the border of the complex are removed (l.~\ref{pc:07}). Thanks to corollary \ref{cor:parallel_removal_v2}, we can remove faces with same direction and orientation in parallel (l.~\ref{pc:08}), while guaranteeing topology preservation. Figure \ref{fig::example_algo} depicts the first steps of the algorithm.
 
-\begin{algorithm}[h!]
+\begin{algorithm}[ht!]
 \label{algo::pardircollapse_v0}
 \SetKwFor{ForAll}{for all}{do}{end}
 \caption[ParDirCollapse]{$ParDirCollapse(X,W,\ell)$}
@@ -218,6 +219,20 @@ On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, on
 \end{algorithm}
 
 
+\begin{figure}[htp]
+\begin{center}
+\begin{tabular}{ccccc}
+	\myincludegraphics{0.19\textwidth}{invader.pdf} &
+	\myincludegraphics{0.19\textwidth}{invader_step1_2.pdf} &
+	\myincludegraphics{0.19\textwidth}{invader_step2_2.pdf} &
+	\myincludegraphics{0.19\textwidth}{invader_step3.pdf} &
+	\myincludegraphics{0.19\textwidth}{invader_step4.pdf} \\
+\end{tabular}
+\caption[Four first iterations of Alg.~\ref{algo::pardircollapse_v0}]{\label{fig::example_algo} \textbf{Four first iterations of Alg.~\ref{algo::pardircollapse_v0}} running on the left-most shape.}
+\end{center}
+\end{figure}
+
+
 
 Different definitions of orientation and direction can be given, each corresponding to a different order of free faces removal in the complex and leading to different results.
 Algorithm~\ref{algo::pardircollapse_v0} can be implemented to run in linear time complexity (proportionally to the number of faces in the complex). Indeed, checking if a face is free or not may be easily done in constant time. Moreover, when a free pair $(f,g)$ is removed from the input complex, it is sufficient to scan the faces contained in $f$ in order to find new free faces.
@@ -230,7 +245,7 @@ As previously said, our goal is to use the skeleton of a scene in order to guide
 
 For example, if the input is a corridor (the void of the corridor), then the skeleton should be a line following the main direction of the corridor. 
 However, Alg.~\ref{algo::pardircollapse_v0} does not necessarily preserve geometrical features of the input object in the resulting skeleton, which end up being a single vertex.
-Moreover, when one wants to preserve geometrical information from the original shape in the skeleton, then it is important to not retain "too much information" during thinning in order to avoid noisy branches in the skeleton.
+Moreover, when one wants to preserve geometrical information from the original shape in the skeleton, then it is important to not retain \quotes{too much information} during thinning in order to avoid noisy branches in the skeleton.
 
 In the following, we introduce a new method in the cubical complex framework, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory geometrical properties. This will be achieved by adding, in the set $W$ of Alg.~\ref{algo::pardircollapse_v0}, some faces from the original object during the thinning process.
 
@@ -265,7 +280,7 @@ Let $f \in \complex{n}{X}$, the lifespan of $f$ in $X$ is the integer
 
 These three values depend on the order of direction and orientation chosen for Alg.~\ref{algo::pardircollapse_v0}.
 
-The lifespan of a face $f$ of $X$ indicates how many "rounds" this face "survives" as a facet in $X$, when removing free pairs with Alg.~\ref{algo::pardircollapse_v0}, and is a good indicator of how important a face can be in an object. Typically, the higher the lifespan is, and the more representative of an object's geometrical feature the face is. The lifespan, sometimes called \myem{saliency}, was used in \cite{Liu2009} (with the name "medial persistence") in order to propose a thinning algorithm in cubical complexes based on two parameters.
+The lifespan of a face $f$ of $X$ indicates how many \quotes{rounds} this face \quotes{survives} as a facet in $X$, when removing free pairs with Alg.~\ref{algo::pardircollapse_v0}, and is a good indicator of how important a face can be in an object. Typically, the higher the lifespan is, and the more representative of an object's geometrical feature the face is. The lifespan, sometimes called \myem{saliency}, was used in \cite{Liu2009} (with the name \quotes{medial persistence}) in order to propose a thinning algorithm in cubical complexes based on two parameters.
 
 
 
@@ -280,8 +295,7 @@ We set $\dist1(x,y)$ as the length of a shortest $1$-path from $x$ to $y$; remar
 The \myem{maximal $1$-ball of $S$ centered on $x$} is the set $\MaxOneBall{S}(x)=\{y \in \Zset^n | \dist1(x,y) < \Dist1{S}(x)\}$.
 We set, for all $x \in S$, the map $\DD1{S}: \Zset^n \rightarrow \Nset$ such that $\DD1{S}(x) = \displaystyle \max_{x \in \MaxOneBall{S}(y)} \Dist1{S}(y)$: this value indicates the radius of the largest maximal $1$-ball contained in $S$ and containing $x$. If $x \in \Compl{S}$, we set $\DD1{S}(x) = 0$. The map $\DD1{S}$ is known as the opening function of $S$ based on the $1$-distance (also called the granulometry function) \cite{Matheron67}: it allows to compute efficiently results of morphological openings by balls of various radius, and gives information on the local thickness of an object.
 
-Given $S \subset \Zset^n$, the value of $\DD1{S}(x)$ of every $x \in S$ can be naively computed by performing successive morphological dilations of values of the map $\Dist1{S}$. A linear algorithm for computing the map $\DD1{S}$ (with regards to the size of the input image) was proposed in \ref{Chaussard_phd}, and will be explored further in details in a future paper.
-
+Given $S \subset \Zset^n$, the value of $\DD1{S}(x)$ of every $x \in S$ can be naively computed by performing successive morphological dilations of values of the map $\Dist1{S}$. A linear algorithm for computing the map $\DD1{S}$ (with regards to the size of the input image) was proposed in \cite{Chaussard_phd}, and will be explored further in details in a future paper.
 
 Finally, we define the \myem{decenterness map}:
 
@@ -289,6 +303,8 @@ Finally, we define the \myem{decenterness map}:
 \label{def::decenterness_map}
 Given $S \subset \Zset^n$, the \myem{decenterness map of $S$} is the map $\decent{S} = \DD1{S} - \Dist1{S}$.
 \end{definition}
+
+An exemple of these maps is shown on Fig.~\ref{fig::globalopening}.
 
 In order to extend all these previous maps defined in $\Zset^n$ to the cubical complex framework, we use the map $\V2C^{-1}$, inverse of the bijective map $\V2C : \Zset^{n} \rightarrow \subfaces{n}{n}$ defined in Sec.~\ref{sec::binary_to_cubic}. It is used to project any $n$-face of $\allfaces{n}$ into $\Zset^n$. This map induces a map from $\mathcal{P}(\subfaces{n}{n})$ to $\mathcal{P}(\Zset^n)$, that we also denote by $\V2C^{-1}$.
 
@@ -299,13 +315,26 @@ Given $Y \subset \allfaces{n}$, we set $S = \V2C^{-1}(Y \inter \subfaces{n}{n})$
 \cplDist1{Y}(f) = \left\{
 \begin{array}{ll}
 \Dist1{S}(\V2C^{-1}(f)) & \text{if $f$ is an $n$-face}\\
-\displaystyle \max_{f \in \cellstrict{g} \inter \subfaces{n}{n}} \cplDist1{Y}(g) & \text{otherwise}
+\displaystyle \max_{f \in (\cellstrict{g} \inter \subfaces{n}{n})} \cplDist1{Y}(g) & \text{otherwise}
 \end{array}
 \right.
 \end{math}
+\bigskip
 
 Informally, if $f$ is a 3-face, then $\cplDist1{Y}(f)$ is the length of the shortest 1-path between the voxel \quotes{corresponding} to $f$ and the set of voxels corresponding to $Y$.
 The same way, we define $\cplDD1{Y}$ and $\cpldecent{Y}$.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tabular}{cccc}
+	\myincludegraphics{0.22\textwidth}{fish.pdf} &
+	\myincludegraphics{0.22\textwidth}{fishd.pdf} &
+	\myincludegraphics{0.22\textwidth}{fishdd.pdf} &
+	\myincludegraphics{0.22\textwidth}{fishcenter.pdf} \\
+\end{tabular}
+\caption[Example of opening and decenterness map]{\label{fig::globalopening} \textbf{Example of opening and decenterness map - } From left to right: a shape $S \subset \Zset^2$ (in gray), $\Dist1{S}$, $\DD1{S}$ and $\decent{S}$ (low values have dark colour).}
+\end{center}
+\end{figure}
 
 
 \subsection{Parameter-free thinning based on the lifespan, opening function and decenterness}
@@ -325,6 +354,23 @@ We can identify surfacic areas of a complex as zones where squares have a high l
 \end{algorithm}
 
 In order to understand what was realised on line \ref{curvskel:01} of Alg.~\ref{algo::3d_curvskel}, we might point out that the birth date of an edge corresponds to the highest death date of the squares containing this edge. Moreover, the map $\cplDist1{X}$ gives, for all 3-faces of $X$, their death date (as the thinning algorithm naturally follows this map to eliminate cubes from a 3-complex). Therefore, for an edge $f$ of $X$, $\cplDist1{X}(f)$ informs us on the highest death date of cubes containing $f$, also equal to the highest birth date of squares containing $f$. In conclusion, $\birth{f}{X} - \cplDist1{X}(f)$ is an approximation of the lifespan of the squares containing $f$.
+
+
+\subsection{Results}
+
+Algorithm \ref{algo::3d_curvskel} allows to obtain a filtered curvilinear skeleton from a three dimensional complex. The results presented in Fig.~\ref{fig::result_skel} show that the skeletons contain the main geometrical information from the input shapes, and do not contain spurious branches.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tabular}{cc|cc}
+	\myincludegraphics{0.18\textwidth}{hand2.jpg} &
+	\myincludegraphics{0.18\textwidth}{hand_curvskel.jpg} &
+	\myincludegraphics{0.24\textwidth}{neptune.jpg} &
+	\myincludegraphics{0.24\textwidth}{neptune_curvskel.jpg} \\
+\end{tabular}
+\caption[Results of algorithm \ref{algo::3d_curvskel}]{\label{fig::result_skel} \textbf{Results of algorithm \ref{algo::3d_curvskel}} for two shapes: a hand (left) and a statue (right). In each pair, the rightmost image represents the skeleton.}
+\end{center}
+\end{figure}
 
 
 

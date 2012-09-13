@@ -1,4 +1,5 @@
 \section{Application to path tracing}
+\label{sec::appli_pathtrace}
 
 Path tracing is a global illumination algorithm that is able to render photo-realistic images of a virtual scene viewed by a camera. The idea behind the algorithm is very elegant: for each pixel of the image, throw rays through the pixel that will bounce on the scene to accumulate lighting exchanges. In order to get fast convergence the rays must be efficiently distributed through the scene, toward the lights. Our idea is to use a curvilinear skeleton of the void of the scene to guide the rays in the correct direction. We start by defining some useful concepts related to path tracing and we present our skeleton based path tracing algorithm.
 

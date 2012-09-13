@@ -16,10 +16,10 @@
 \def\OneBall#1{\mathbb{B}^{1}_{#1}}
 \def\MaxOneBall#1{\mathbb{M}\OneBall{#1}}
 
-\def\mydist1{D_1}
-\def\mydd1{\Omega_1}
-\def\mydecent{\mathcal{DC}_1}
-\def\dist1{d_1}
+\def\mydist1{D}
+\def\mydd1{\Omega}
+\def\mydecent{\mathcal{DC}}
+\def\dist1{d}
 \def\Dist1#1{\mydist1(#1)}
 \def\DD1#1{\mydd1(#1)}
 \def\decent#1{\mydecent(#1)}
@@ -77,12 +77,14 @@
 \mainmatter
 
 \title{A 3d curvilinear skeletonization algorithm with application to path tracing}
-\author{John Chaussard\inst{1} \and Laurent No\"{e}l\inst{2} \and Venceslas Biri\inst{2} \and Michel Couprie\inst{2}}
+\author{John Chaussard\inst{1} \and Laurent No\"{e}l\inst{2} \and Venceslas Biri\inst{2} \and Michel Couprie\inst{2}\thanks{This work has been partially supported by the \quotes{ANR-2010-BLAN-0205 KIDICO} project}}
 \institute{Universit\'{e} Paris 13, Sorbonne Paris Cit\'{e}, LAGA, CNRS(UMR 7539), \\ F-93430, Villetaneuse, France \\ \email{chaussard@math.univ-paris13.fr}
 \and
-Universit\'{e} Paris Est, LABINFO-IGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, Cit\'{e} DESCARTES \\ BP 99  93162 Noisy le Grand CEDEX, France \\ \email{laurent.noel@esiee.fr, v.biri@esiee.fr, michel.couprie@esiee.fr}}
+Universit\'{e} Paris Est, LIGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, Cit\'{e} DESCARTES \\ BP 99  93162 Noisy le Grand CEDEX, France \\ \email{laurent.noel@esiee.fr, v.biri@esiee.fr, michel.couprie@esiee.fr}}
+
 
 \maketitle
+
 
 \begin{abstract}
 What we propose is really great...
@@ -97,17 +99,20 @@ What we propose is really great...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \label{sec::intro}
-Path tracing algorithms are able to render photorealistic images from a scene description by simulating light propagation. The photorealistic aspect is achieved by simulating diffusion of light: elements of the scene which are illuminated by a light source can cast part of the light they receive. Thanks to this indirect lighting, parts of the scene which are not directly illuminated by any light source actually receive light, thus giving a nice effect of light diffusion and soft shadows to the image. 
+Path tracing algorithms are able to render photorealistic images from a scene description by simulating light propagation. The photorealistic aspect is achieved by simulating diffusion of light: elements of the scene which are illuminated by a light source can cast part of the light they receive. Consequently, parts of the scene which are not directly illuminated by any light source actually receive light, thus giving a realistic effect of light diffusion to the resulting image. 
 
-To do so, a path tracing algorithm sends rays (of light) with a given energy from the camera, and make them bounce around the scene until they encounter a light source. When a ray hit a point of an object, it loses some energy and gathers some information on the object's material. Then, the ray is reemitted in a direction randomly chosen among various possibilities. Once a ray reaches a light source, the information it gathered through its journey in the scene is averaged in order to decide of the colour of the first impact point. This color is then allocated to one of the pixel of the image, and the process is repeated for each pixel of the output image. In order to obtain a realistic result, it is necessary to integrate various bouncing directions for the rays: this is done by sending many rays for a same pixel: the more rays, the longer the algorithm will take to produce an image, but the more realistic (close to the results obtained by reemitting rays in all possible directions) the result will be. A path tracing can be seen as a random walk process.
+A path tracing algorithm sends rays (of light) from the camera (the viewpoint of the scene), and let them bounce around the scene until they encounter a light source. When a ray hit a point of an object (like a wall), it gathers some information on the object's material. The ray is then reemitted in a random direction. Once a ray reaches a light source, the information it gathered through its journey in the scene is averaged in order to decide of the colour of the first impact point. This color is then allocated to one of the pixel of the image, and the process is repeated for each pixel of the output image. To avoid \quotes{unrealistic} results due to an unusual reemission direction of a ray, the algorithm actually sends, for each pixel of the image, many rays: the more rays, the longer the algorithm will take to produce an image, but the more realistic the result will look. A path tracing can be seen as a random walk process through the scene.
 
-The bouncing direction of a ray depends on the texture of the hit point: to each texture is associated a probability distribution function which gives, for a given incoming direction, the probability of reemitting the ray in another directions. The bouncing direction is randomly chosen among the possible values of the probability distribution function. Choosing only one bouncing direction produces a sampling effect which creates noise in the resulting image (due to points where unusual directions were chosen): this noise is naturally reduced by shooting more rays per each image pixel, but unless one shoots a big amount of rays per pixels (and waits a long time before obtaining an image), the noise will always be present in the output image. 
+The bouncing direction of a ray depends on a function associated to the texture of the hit point: this probability distribution function gives, for a given incoming direction, the probability of reemitting the ray in another directions. The bouncing direction is randomly chosen among the possible values of this function. Choosing only one bouncing direction produces a noise in the resulting image (due, as previously said, to points where unusual directions were chosen): this noise is naturally reduced by shooting many rays for each image pixel (however, it will remain). 
 
-In order to avoid infinite bouncing of rays in the scene, a lower limit is set for each ray's energy: below this threshold, a ray will be considered to bring a too small contribution to the pixel's color and will be eliminated from the scene. However, a lost ray is as a waste of computation time, and if one wants to speed up the path tracing algorithm, he should try to minimize the amount of lost rays.
+In order to avoid infinite bouncing of rays in the scene, a limit is set for the number of bounces a ray can do. If a ray does not reach any light source after a given number of bounces, it is eliminated from the scene. A lost ray is as a waste of computation time, and minimizing this loss would speed up the algorithm.
 
-%Precomputation time must remain fast > skeleton !!
+Our proposition is to reduce both the time taken by a path tracing algorithms and the noise in the output images by guiding rays towards the scene's light sources, thus reducing the number of rays \quotes{lost} during the computation. To do this, we could perform some precomputation on the void space of the scene (the medium where the rays of light propagate) in order to have, later in the algorithm, a clue on towards which direction a ray should bounce in order to meet a light source. Such precomputation can take time and become more expensive than the original algorithm.
 
-Noise in photorealistic computer generated images. Need to accelerate convergence. Add knowledge of the geometry and topology of the scene thanks to discrete geometry. Use the skeleton. Need of a robust curvilinear skeleton that represent topology and approximate geometry. Use the cubical complex framework.
+To keep the precomputation fast, we would perform it only on a subset of points of the voids of the scene. The precomputation we want to perform relies on shortest paths and visibility tests, we therefore want to have a reduced connected set of points (topology preservation). Moreover, in order to obtain correct results, this set of points should contain geometrical information from the original scene (for example, it should possess branches propagating in the elongated parts of the scene).
+
+A filtered curvilinear skeleton of the voids of the scene would meet all the required properties for our subset of points: it is a thin subset of points of the scene, with the same topology and retaining the main geometrical information of the scene (if the filtering step is efficient). In the following, we first present a new curvilinear skeletonization algorithm (Sec.~\ref{sec::skeletonization}) in the cubical complex framework (Sec.~\ref{sec::binary_to_cubic}), producing filtered skeletons without needing any user input (Sec.~\ref{sec::aspect_no_param}). Then, we show how to use such skeletons to enhance the results of a path tracing algorithm (see Sec.~\ref{sec::appli_pathtrace}).
+
 
 \section{The cubical complex framework}
 \label{sec::binary_to_cubic}
@@ -117,7 +122,7 @@ Let $\Z$ be the set of integers, we consider the family of sets $\mathbb{F}^1_0$
 
 We denote by $\allfaces{n}$ the set composed of all faces in $\Z^n$. Given $m \in \dinterval{0}{n}$, we denote by $\subfaces{n}{m}$ the set composed of all $m$-faces in $\Z^n$.
 Let $f \in \allfaces{n}$. We set $\cell{f} = \{g \in \allfaces{n}\vert g \subseteq f\}$, and $\cellstrict{f} = \cell{f} \setminus \{f\}$. Any element of $\cell{f}$ (resp. $\cellstrict{f}$) is \myem{a face of $f$} (resp. \myem{a proper face of $f$}.
-The \myem{closure} of a set of faces $X$ is the set $\closure{X}=\union\{\cell{f} \vert f \in X\}$. The set $\Compl{X}$ is $\allfaces{n} \setminus X$. 
+The \myem{closure} of a set of faces $X$ is the set $\closure{X}=\union\{\cell{f} \vert f \in X\}$.
 
 \begin{definition}
 A finite set $X$ of faces in $\allfaces{n}$ is a \myem{complex} if $X=\closure{X}$, and we write $\complex{n}{X}$. 
@@ -132,7 +137,7 @@ A face $f \in X$ is \myem{a facet of $X$} if $f$ is not a proper face of any fac
 
 Traditionally, a binary image is a finite subset of $\Zset^n$ (called voxel image when $n=3$). To transpose such image to the cubical complex framework, we associate to each element of $S\subseteq \Zset^n$ an n-face of $\allfaces{n}$. Let $x=(x_1,...,x_n) \in S$, we define the n-face $\V2C(x) = \{x_1, x_1 + 1\} \times \ldots \times \{x_n, x_n + 1\}$. We can extend the map $\V2C$ to sets: $\V2C(S)=\{\V2C(x) | x \in S\}$. Given a set $S \subset \Zset^n$, we associate to it the cubical complex $\closure{\V2C(S)}$.
 
-The collapse operation is the basic operation for performing homotopic thinning of a complex, and consists of removing two distinct faces $(f,g)$ from a complex $X$ under the condition that they are free:
+The collapse operation is the basic operation for performing homotopic thinning of a complex, and consists of removing two distinct faces $(f,g)$ from a complex $X$ under the condition that they form a free pair:
 
 \begin{definition}
 Let $\complex{n}{X}$, and let $f,g$ be two faces of $X$. The face $g$ is \myem{free for $X$}, and the pair $(f,g)$ is \myem{a free pair for $X$} if $f$ is the only face of $X$ which strictly contains $g$. 
@@ -181,7 +186,7 @@ Let $\complex{n}{X}$, and let $(f_1,g_1) \ldots (f_m,g_m)$ be $m$ distinct free 
 \end{corollary}
 
 
-Intuitively, we want our thinning algorithm to remove free faces of a complex \quotes{layer by layer} and avoid having unequal thinning of the input complex. Therefore, we want each execution of the algorithm to remove free faces located on the border of the input complex. 
+Intuitively, we want our thinning algorithm to remove free faces of a complex \quotes{layer by layer} and to avoid having unequal thinning of the input complex. Therefore, we want each execution of the algorithm to remove free faces located on the border of the input complex. 
 We define $\border{X}$ as the set all faces belonging to a free pair for $X$. We now introduce Alg.~\ref{algo::pardircollapse_v0}, a directional parallel thinning algorithm.
 
 On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, only faces located on the border of the complex are removed (l.~\ref{pc:07}). Thanks to corollary \ref{cor:parallel_removal_v2}, we can remove faces with same direction and orientation in parallel (l.~\ref{pc:08}), while guaranteeing topology preservation.
@@ -221,16 +226,16 @@ Algorithm~\ref{algo::pardircollapse_v0} can be implemented to run in linear time
 
 \section{Aspect preservation during thinning: a parameter-free method}
 \label{sec::aspect_no_param}
-As previously said, our goal is to use the skeleton of a scene in order to guide light rays from the camera of the scene towards the light. In order to achieve this objective, we need a skeleton which \quotes{looks like} the original scene it was calculated from. 
+As previously said, our goal is to use the skeleton of a scene in order to guide light rays from the camera of the scene towards the light. In order to achieve this objective, we need a skeleton which captures the main geometrical features of the original scene it was calculated from. 
 
 For example, if the input is a corridor (the void of the corridor), then the skeleton should be a line following the main direction of the corridor. 
-However, Alg.~\ref{algo::pardircollapse_v0} does not necessarily preserve "geometrical features" of the input object in the resulting skeleton, which end up being a single vertex.
-Moreover, when one wants to preserve "geometrical information" from the original shape in the skeleton, then it is important to not retain "too much information" during thinning in order to avoid noisy branches in the skeleton.
+However, Alg.~\ref{algo::pardircollapse_v0} does not necessarily preserve geometrical features of the input object in the resulting skeleton, which end up being a single vertex.
+Moreover, when one wants to preserve geometrical information from the original shape in the skeleton, then it is important to not retain "too much information" during thinning in order to avoid noisy branches in the skeleton.
 
 In the following, we introduce a new method in the cubical complex framework, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory geometrical properties. This will be achieved by adding, in the set $W$ of Alg.~\ref{algo::pardircollapse_v0}, some faces from the original object during the thinning process.
 
 \subsection{The lifespan of a face}
-In the following, we define additional functions in the cubical complex, related to the thinning process (Alg.~\ref{algo::pardircollapse_v0}), which are essential for the filtering step of the skeleton. The first one we present is the \myem{death date} of a face.
+In the following, we define additional functions in the cubical complex, related to the thinning process (Alg.~\ref{algo::pardircollapse_v0}), which are essential for the filtering step of the skeletonization. The first one we present is the \myem{death date} of a face.
 
 \begin{definition}
 Let $f \in \complex{n}{X}$, the \myem{death date of $f$ in $X$}, denoted by $\death{f}{X}$, is the smallest integer $d$ such that $f \notin ParDirCollapse(X, \emptyset, d)$. 
@@ -239,11 +244,11 @@ Let $f \in \complex{n}{X}$, the \myem{death date of $f$ in $X$}, denoted by $\de
 Intuitively, the death date of a face indicates how many layers of free faces should be removed from a complex $X$, using Alg.~\ref{algo::pardircollapse_v0}, before removing completely the face from $X$. We now define the \myem{birth date} of a face:
 
 \begin{definition}
-Let $f \in \complex{n}{X}$, the \myem{birth date of $f$ in $X$}, denoted by $\birth{f}{X}$, is the smallest integer $b$ such that either $f$ is a facet of $ParDirCollapse(X, \emptyset, b)$, or either $f \notin ParDirCollapse(X, \emptyset, b)$.
+Let $f \in \complex{n}{X}$, the \myem{birth date of $f$ in $X$}, denoted by $\birth{f}{X}$, is the smallest integer $b$ such that either $f$ is a facet of $ParDirCollapse(X, \emptyset, b)$, or $f \notin ParDirCollapse(X, \emptyset, b)$.
 \end{definition}
 
-The birth date indicates how many layers of free faces must be removed from $X$ with Alg.\ref{algo::pardircollapse_v0} before transforming $f$ into a facet of $X$ (we consider a face "lives" when it is a facet).
-Finally, we can define the \myem{lifespan} of a face :
+The birth date indicates how many layers of free faces must be removed from $X$ with Alg.\ref{algo::pardircollapse_v0} before transforming $f$ into a facet of $X$ (we consider that a face \quotes{lives} when it is a facet).
+Finally, we define the \myem{lifespan} of a face :
 
 \begin{definition}
 Let $f \in \complex{n}{X}$, the lifespan of $f$ in $X$ is the integer 
@@ -260,7 +265,7 @@ Let $f \in \complex{n}{X}$, the lifespan of $f$ in $X$ is the integer
 
 These three values depend on the order of direction and orientation chosen for Alg.~\ref{algo::pardircollapse_v0}.
 
-The lifespan of a face $f$ of $X$ indicates how many "rounds" this face "survives" as a facet in $X$, when removing free faces with Alg.~\ref{algo::pardircollapse_v0}, and is a good indicator of how important a face can be in an object. Typically, the higher the lifespan is, and the more representative of an object's visual feature the face is. The lifespan, sometimes called \myem{saliency}, was used in \cite{Liu2009} (with the name "medial persistence") in order to propose a thinning algorithm in cubical complexes based on two parameters.
+The lifespan of a face $f$ of $X$ indicates how many "rounds" this face "survives" as a facet in $X$, when removing free pairs with Alg.~\ref{algo::pardircollapse_v0}, and is a good indicator of how important a face can be in an object. Typically, the higher the lifespan is, and the more representative of an object's geometrical feature the face is. The lifespan, sometimes called \myem{saliency}, was used in \cite{Liu2009} (with the name "medial persistence") in order to propose a thinning algorithm in cubical complexes based on two parameters.
 
 
 
@@ -268,15 +273,15 @@ The lifespan of a face $f$ of $X$ indicates how many "rounds" this face "survive
 \label{subsec::distmap}
 In addition to the lifespan of a face, the proposed homotopic thinning method uses information on distance between faces in order to decide if a face should be kept safe from deletion. We define hereafter various notions based on distances in the voxel framework.
 
-Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal or inferior to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. Remark that $d_1$ is indeed the $6$-distance in the 3d voxel framework.
+Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal or inferior to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. 
 
-We set $\dist1(x,y)$ as the length of the shortest $1$-path from $x$ to $y$. Let $S \subset \Zset^n$, we set, for all $x \in \Zset^n$, the map $\Dist1{S}: \Zset^n \rightarrow \Nset$ such that $\Dist1{S}(x) = \displaystyle \min_{y \in \Compl{S}} \dist1(x,y)$. 
+We set $\dist1(x,y)$ as the length of a shortest $1$-path from $x$ to $y$; remark that $\dist1$ is indeed the $6$-distance in the 3d voxel framework. Let $S \subset \Zset^n$, we set $\Compl{S} = \Zset^n \setminus S$, and for all $x \in \Zset^n$, the map $\Dist1{S}: \Zset^n \rightarrow \Nset$ is such that $\Dist1{S}(x) = \displaystyle \min_{y \in \Compl{S}} \dist1(x,y)$. 
 
 The \myem{maximal $1$-ball of $S$ centered on $x$} is the set $\MaxOneBall{S}(x)=\{y \in \Zset^n | \dist1(x,y) < \Dist1{S}(x)\}$.
 We set, for all $x \in S$, the map $\DD1{S}: \Zset^n \rightarrow \Nset$ such that $\DD1{S}(x) = \displaystyle \max_{x \in \MaxOneBall{S}(y)} \Dist1{S}(y)$: this value indicates the radius of the largest maximal $1$-ball contained in $S$ and containing $x$. If $x \in \Compl{S}$, we set $\DD1{S}(x) = 0$. The map $\DD1{S}$ is known as the opening function of $S$ based on the $1$-distance (also called the granulometry function) \cite{Matheron67}: it allows to compute efficiently results of morphological openings by balls of various radius, and gives information on the local thickness of an object.
 
-Given $S \subset \Zset^n$, the value of $\DD1{S}(x)$ of every $x \in S$ can be naively computed by performing successive morphological dilations of values of the map $\Dist1{S}$. 
-%TODO Parler du fait que l'on a une version dans la th�se, et une version plus am�lior� dans th�se et public avenir
+Given $S \subset \Zset^n$, the value of $\DD1{S}(x)$ of every $x \in S$ can be naively computed by performing successive morphological dilations of values of the map $\Dist1{S}$. A linear algorithm for computing the map $\DD1{S}$ (with regards to the size of the input image) was proposed in \ref{Chaussard_phd}, and will be explored further in details in a future paper.
+
 
 Finally, we define the \myem{decenterness map}:
 
@@ -304,9 +309,9 @@ The same way, we define $\cplDD1{Y}$ and $\cpldecent{Y}$.
 
 
 \subsection{Parameter-free thinning based on the lifespan, opening function and decenterness}
-As previously said, we add edges to the set $W$ of Alg.~\ref{algo::pardircollapse_v0} in order to retain, in the resulting curvilinear skeleton, important edges from the original object. Given a cubical complex $X$, if an edge of $X$ has a high decenterness value for $X$, then it is probably located too close to the border of $X$ and does not represent an interesting visual feature to preserve.
+As previously said, we add edges to the set $W$ of Alg.~\ref{algo::pardircollapse_v0} in order to retain, in the resulting curvilinear skeleton, important edges from the original object. Given a cubical complex $X$, if an edge of $X$ has a high decenterness value for $X$, then it is probably located too close to the border of $X$ and does not represent an interesting geometrical feature to preserve.
 %TODO ref vers image de decenterness
-On the other hand, if an edge has a high lifespan for $X$, then it means it was not removed quickly, after becoming a facet, by the thinning algorithm and might represent some precious visual information on the original object. An idea would be to keep, during thinning, all edges whose lifespan is superior to the decenterness value. Unfortunately, this strategy produces skeletons with many spurious branches in surfacic areas of the original object.
+On the other hand, if an edge has a high lifespan for $X$, then it means it was not removed quickly, after becoming a facet, by the thinning algorithm and might represent some precious geometrical information on the original object. An idea would be to keep, during thinning, all edges whose lifespan is superior to the decenterness value. Unfortunately, this strategy produces skeletons with many spurious branches in surfacic areas of the original object.
 
 We can identify surfacic areas of a complex as zones where squares have a high lifespan. Therefore, in order to avoid spurious branches in surfacic areas, we need to make it harder for edges to be preserved in these zones. It can be achieved by deciding that an edge will be kept safe from deletion by the thinning algorithm if its lifespan is superior to the decenterness value plus the lifespan of squares \quotes{around} this edge. This leads us to proposing Alg.~\ref{algo::3d_curvskel}. 
 

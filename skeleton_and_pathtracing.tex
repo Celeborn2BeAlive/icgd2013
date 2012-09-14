@@ -88,7 +88,7 @@ Universit\'{e} Paris Est, LIGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, 93162 
 
 
 \begin{abstract}
-We present a novel 3d curvilinear skeletonization algorithm which produces filtered skeletons without needing any user input, thanks to a new parallel algorithm based on the cubical complex framework. We then propose a new path tracing algorithm which uses such curvilinear skeleton in order to produce less noisy images in less time than the classical approach.
+We present a novel 3d curvilinear skeletonization algorithm which produces filtered skeletons without needing any user input, thanks to a new parallel algorithm based on the cubical complex framework. These skeletons are used a new path tracing algorithm in order to produce less noisy images in less time than the classical approach.
 \end{abstract}
 
 
@@ -103,11 +103,11 @@ We present a novel 3d curvilinear skeletonization algorithm which produces filte
 
 Path tracing algorithms~\cite{Ka86,LW93} are able to render photorealistic images from a scene description by simulating light propagation. The photorealistic aspect is achieved by simulating diffusion of light: elements of the scene which are illuminated by a light source can cast part of the light they receive. Consequently, parts of the scene which are not directly illuminated by any light source actually receive light, thus giving a realistic effect of light diffusion to the resulting image. 
 
-A path tracing algorithm sends rays (of light) from the camera (the viewpoint of the scene), and let them bounce around the scene until they encounter a directly illuminated zone. When a ray hits a point of an object (like a wall), it gathers information on the object's material. The ray is then reemitted in a random direction. Once a ray reaches a light source, the information it gathered through its journey in the scene is averaged in order to decide of the color of the first impact point. This color is then allocated to one of the pixels of the image, and the process is repeated for each pixel of the output image. To avoid \quotes{unrealistic} results due to an unusual reemission direction of a ray, the algorithm actually sends, for each pixel of the image, many rays: the more rays, the longer the algorithm will take to produce an image, but the more realistic the result will look. A path tracing can be seen as a random walk process through the scene.
+A path tracing algorithm sends rays from the camera, and let them bounce around the scene until they encounter a directly illuminated zone. When a ray hits a point of any surface, it is reemitted in a random direction. Once a ray reaches a directly illuminated area, all luminance gathered through its journey in the scene is averaged in order to set the color one of the pixels of the image, and the process is repeated for each pixel of the output image. To avoid the noise resulting from this stochastic process, the algorithm actually sends, for each pixel of the image, many rays: the more rays, the longer the algorithm will take to produce an image, but the more realistic the result will look. A path tracing can be seen as a random walk process through the scene.
 
-In order to avoid infinite bouncing of rays in the scene, a limit is set for the number of bounces a ray can do. If a ray does not reach any light source after a given number of bounces, it is eliminated from the scene. A lost ray is as a waste of computation time, and minimizing this loss would speed up the algorithm.
+In order to avoid infinite bouncing of rays in the scene, a limit is set for the number of bounces a ray can do. If a ray does not reach any directly illuminated area after a given number of bounces, its contribution is null. Such lost ray is as a waste of computation time, and minimizing this loss would speed up the algorithm.
 
-Our proposition is to reduce both the time taken by a path tracing algorithms and the noise in the output images by guiding rays towards the scene's light sources, thus reducing the number of rays \quotes{lost} during the computation. To do this, we perform some precomputation on the void space of the scene (the medium where the rays of light propagate) in order to have, later in the algorithm, a clue on towards which direction a ray should bounce in order to meet a light source. Such precomputation can take time and become more expensive than the original algorithm.
+Our proposition is to reduce both the time taken by a path tracing algorithms and the noise in the output images by guiding rays towards the scene's light sources, thus reducing the number of rays \quotes{lost} during the computation. To do this, we perform some precomputation on the void space of the scene (the medium where the rays of light propagate) in order to have, later in the algorithm, a clue on towards which direction a ray should bounce in order to meet a light source. Unfortunately, such precomputation may take time and become more expensive than the original algorithm.
 
 To keep the precomputation fast, we perform it only on a subset of points of the voids of the scene. The precomputation we want to perform relies on paths and visibility tests, therefore want this set of points to be representative of both the topology and the geometry of the original scene. For example, it should possess branches propagating in the elongated parts of the scene. A filtered curvilinear skeleton of (the voids of) the scene meets all the required properties for our subset of points: it is a thin subset of points of the scene, with the same topology and retaining the main geometrical information of the scene. Note that in this application, the filtering of the skeleton (elimination of spurious branches) need to be both efficient and completely automatic, for one cannot ask a user to set parameters for each scene. 
 
@@ -117,12 +117,13 @@ To keep the precomputation fast, we perform it only on a subset of points of the
 	\myincludegraphics{0.60\textwidth}{dgci_ray_corridor.png} &
 	\myincludegraphics{0.40\textwidth}{dgci_compare_door.png}
 \end{tabular}
-\caption{Images $a$ and $b$ shows some rays of the path tracing guided by the material of the objects (image $a$) or our skeleton based method (image $b$). Images $c$ and $d$ point out the noise reduction between the classic path tracing (image $c$) and our method (image $d$)}
+
+\caption{\label{fig::intro_image} Images $a$ and $b$ shows some rays of the path tracing guided by the material of the objects (image $a$) or our skeleton based method (image $b$). Images $c$ and $d$ point out the noise reduction between the classic path tracing (image $c$) and our method (image $d$).}
 \end{center}
 \end{figure}
 
 The purpose of this paper is twofold: we first introduce a new curvilinear skeletonization algorithm (Sec.~\ref{sec::skeletonization}) in the cubical complex framework (Sec.~\ref{sec::binary_to_cubic}), producing filtered skeletons without needing any user input (Sec.~\ref{sec::aspect_no_param}). 
-Then, we expose a new method, based on such skeletons, to enhance the results and the performance of a path tracing algorithm (see Sec.~\ref{sec::appli_pathtrace}).
+Then, we expose a new method, based on such skeletons, to enhance the results and the performance of the path tracing algorithm (see Sec.~\ref{sec::appli_pathtrace}).
 
 \section{The cubical complex framework}
 \label{sec::binary_to_cubic}

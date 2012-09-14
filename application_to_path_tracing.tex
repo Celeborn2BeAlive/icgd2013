@@ -52,7 +52,7 @@ Let $O$ be the origin of the camera in the scene. For each pixel $P$ of the fina
 L(x \rightarrow \Theta) &= L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_s(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) d\omega_\Phi
 \end{align*}
 
-$L$ is the radiance (a radiometric quantity that represents luminosity) from point $x$ toward direction $\Theta$. $L_e$ is the emitted radiance (non null only on light sources). The point $r(x, \Phi)$ is the nearest visible point from $x$ in the direction $\Phi$ of the hemisphere $\Omega_x$. The $f_s$ function expresses how much luminosity is exchanged, on point $x$, between an incoming ray $\Phi$ and the outgoing ray $\Theta$. Intuitively it represents the material properties of the surface at point $x$.
+$L$ is the radiance (a radiometric quantity that represents luminosity) from point $x$ toward direction $\Theta$. $L_e$ is the emitted radiance (non null only on light sources). The point $r(x, \Phi)$ is the nearest visible point from $x$ in the direction $\Phi$ of the hemisphere $\Omega_x$. The $f_s$ function expresses how much luminosity is exchanged, on point $x$, between an incoming ray $\Phi$ and the outgoing ray $\Theta$. It represents the material properties of the surface at point $x$.
 
 This integrand expresses an intuitive idea: the reflected radiance from $x$ towards the camera is the result of computing all incoming luminosity on $x$ scaled by a factor which depends on the material on $x$ and the angle of the ray going from the camera to $x$. The most common method used to estimate the integral, denoted by $L_r(x \rightarrow \Theta)$, is the Monte-Carlo integration which provides the following:
 
@@ -64,11 +64,8 @@ where $p$ is a probability density function (pdf) that is used to sample $\Phi$.
 The strategy of choosing an adapted pdf is called \myem{importance sampling} and is used in global illumination to improve the convergence speed of the algorithms.
 
 The algorithm computes $L$ as follow: first, it chooses one random direction $\Phi$ based on the pdf $p$. Then, it applies the estimator by calling $L$ recursively to compute $L_r$ (shoots a new ray in the direction $\Phi$, computes the new hit point with the scene, and compute the new radiance at this point). Finally, it returns the sum of the emitted radiance $L_e$ and the result for $L_r$. The recursion stops when a maximal number of bounces has been reached.
-%ASK: euh, c'est L ou L_r%
-%c'est bon de dire que ça s'arrete au light%
 
 This computation is done multiple times for each pixel (at different positions over the pixel). We average the results and get an estimation of the mean radiance passing through the pixel and heading towards the camera.
-%at different positions over the pixel  ???%
 A bad pdf would lead in picking directions that don't reach the light before the end of the recursion, and produce results with a lot of noise in the final image. In the next part, we explain how to produce a pdf based on the curvilinear skeleton.
 
 
@@ -79,43 +76,47 @@ As stated in the introduction, a curvilinear skeleton of the void (with some pre
 
 The integrand of $L_r$ is:
 
-%a revoir, je ne comprends pas tout
-
 \begin{equation*}
 f_s(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi).
 \end{equation*}
 
-It is a product of two functions that can be efficiently sampled individually but that are hard to sample when they are combined. The most common strategy used to sample $\Omega_x$ is to use the function $f_s$ because we know it: it is given as an input of the algorithm, for exemple with textures that describe materials.
-
-The term $L$ is rarely used because its evaluation cannot be done in constant time. Remember that it represents the distribution of light in the scene. It takes high values when $\Phi$ carries a lot of energy. Our method gives a way to sample according to $L$.
-
+The most common strategy used to sample $\Omega_x$ is to use the function $f_s$ because it is an input of the algorithm.
+The term $L$, which represents the distribution of light in the scene, is unknown. Our method gives a way to sample according to $L$.
 
 
 \subsubsection{Construction of the importance points}
 
-The skeleton of the voids of the scene is computed using Alg.~\ref{algo::3d_curvskel} and is converted to a graph (the nodes are the 0-faces and the edges are the 1-faces). We then compute a set of \myem{importance points}: these points will be used to sample $\Omega_x$ in the path tracing algorithm. For each node of the skeleton $n$, one importance point $imp_n$ is computed. Intuitively, the importance point associated to $n$ gives us a direction to follow in order to find a light source.
-%TODO a verifier quand meme
+The skeleton of the voids of the scene is computed using Alg.~\ref{algo::3d_curvskel} and is converted to a graph (the nodes are the 0-faces and the edges are the 1-faces). We then compute a set of \myem{importance points}, which will be used to sample $\Omega_x$ in the path tracing algorithm. To each node $n$ of the skeleton, one importance point $imp_n$ is computed. Intuitively, the importance point associated to $n$ is the direction to follow in order to find a light source.
 
 %La, pas clair !!!
-Let $L$ be a light source of the scene ($L \in S_L$) and $n_L$ the nearest node that is visible by $L$. We first compute a tree of shortest paths along the skeleton with $n_L$ as root. We use the Dijkstra algorithm with a distance based on visibility from $n_L$: We put $d(n, m) = 1$ if $m$ is visible from $n_L$ and $d(n, m) = 10$ if not. It results that the paths that are enlighted by $L$ will have a shorter distance and will guide us to the light faster than the dark ones.
+Let $L$ be a light source of the scene and $n_L$ the nearest node of the skeleton that is visible by $L$. For each node, we compute the shortest path to $n_L$ along the skeleton. To do so, we use the Dijkstra algorithm and weight the edges of the skeleton depending on a visibility criteria: the weight of an edge $e$ is $1$ if $e$ is visible from $n_L$ and $10$ else. It results that the paths that are illuminated by a light will be shorter than paths located in dark areas.
 
-Let $n$ be a node of the skeleton and $V_n$ the set of visible nodes from $n$ along the shortest path toward $n_L$. The importance point $imp_n$ associated to $n$ is the barycenter of $V_n$.
+Let $n$ be a node of the skeleton and $V_n$ the set of visible nodes from $n$ along the shortest path toward $n_L$. The importance point $imp_n$ associated to $n$ is the barycenter of $V_n$. An example is shown on Fig.~\ref{fig::example_imp}.
 
+
+\begin{figure}[tb]
 \begin{center}
-\includegraphics[scale=0.5]{images/importance_points.png}
+\begin{tabular}{c|c}
+	\myincludegraphics{0.3\textwidth}{graph_heuristic.pdf} &
+	\myincludegraphics{0.3\textwidth}{graph_heuristic.pdf} \\
+\end{tabular}
+\caption[Example of importance point construction]{\label{fig::example_imp} \textbf{On the left}, we illustrate the importance point $imp_n$ associated to a node $n$. The dotted black line shows the closest node to $n$ not included in $V_n$. \textbf{On the right}, an example of the curvilinear skeleton (in red) obtained in the Sponza scene.}
 \end{center}
+\end{figure}
+
 
 \subsubsection{Sampling according to $L$}
 
-Given a point $x$ and a direction $\Theta$ we want to compute $L(x \rightarrow \Theta)$ and then sample the hemisphere $\Omega_x$. We search for the nearest skeleton node $n$ and its importance point $imp_n$. We sample the hemisphere with a power-cosine pdf centered on $\overrightarrow{ximp_n}$:
+Given a point $x$ on the scene and a direction $\Theta$, we want to compute $L(x \rightarrow \Theta)$ and then sample the hemisphere $\Omega_x$. We search for the nearest skeleton node $n$ to $x$ and its importance point $imp_n$. We sample the hemisphere with a power-cosine pdf centered on $\overrightarrow{x\,imp_n}$:
 \begin{equation*}
 p_{skel}(\Phi) = \frac{s + 1}{2\pi} cos^s \alpha
 \end{equation*}
-with $\alpha$ the angle between $\overrightarrow{ximp_n}$ and $\Phi$, $s$ being a parameter called skeleton strength. The higher $s$ is, the more we sample close $\overrightarrow{ximp_n}$.
+with $\alpha$ the angle between $\overrightarrow{x\,imp_n}$ and $\Phi$, $s$ being a parameter called skeleton strength. The higher $s$ is, the closer to $\overrightarrow{x\,imp_n}$ we sample.
+
 
 \subsection{Results and discussion}
 
-Some results are presented in figure~\ref{fig:results} where we can see the decrease in noise compare to the regular path tracing. We computed the MSE value for different scenes that are presented in table~\ref{tab:timing}
+Some results are presented on Fig.~\ref{fig:results} and Fig.~\ref{fig::intro_image} where we can see that our method produce less noisy images compared to the regular path tracing. We present, in table~\ref{tab:timing}, the time taken by each method to produce an image of same quality (the quality is measured by the mean square error (MSE) with a reference image) in different scenes.
 
 \begin{figure}[tbhp]
 \begin{center}
@@ -124,7 +125,7 @@ Some results are presented in figure~\ref{fig:results} where we can see the decr
 \end{center}
 \end{figure}
 
-\begin{table}[t!]
+\begin{figure}[tb]
 \centering
 \begin{tabular}{|c|c|c|c|}
 \hline
@@ -135,9 +136,9 @@ MSE 100& 145 / 57 & 301 / 156 & 881 / 826 \\
 MSE 40& 434 / 260 & 924 / 628 & 2678 / 2570 \\
 \hline
 \end{tabular}
-\caption{Timing(s) to reach an MSE of 100 and 40 against reference images. In each cell, the left number is for the standard path tracing, the right one  our method}
+\caption{Time to reach an MSE of 100 and 40 against reference images. In each cell, the left number is for the standard path tracing, the right is for our method}
 \label{tab:timing}
-\end{table}
+\end{figure}
 
 \section{Conclusion}
 We presented in this article a new skeletonization algorithm that both preserves geometrical features of objects and produces a pure curvilinear skeleton. These two properties allow us to improve the path tracing algorithm in guiding the rays towards the main illuminated area of the scene. Our algorithm is faster and produce less noise than the classical path tracing method.

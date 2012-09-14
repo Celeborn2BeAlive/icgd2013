@@ -120,9 +120,12 @@ with $\alpha$ the angle between $\overrightarrow{ximp_n}$ and $\Phi$, $s$ being 
 
 We present some results of our algorithm applied to four scenes. The first row shows our result and the second row shows a standard path tracing with the same input parameters. On each picture a MSE (mean square error) value with a reference image is shown.
 
+\begin{figure}[htp]
 \begin{center}
-\includegraphics[scale=0.17]{images/four_scenes_highlighted.png}
+\includegraphics[scale=0.17]{images/four_scenes_for_dgci.png}
+\caption{Four images comparing the classic path tracing (image $a$ and $c$) and our method (image $b$ and $d$). Note the noise reduction of our method in the left wall of images $a$ and $b$, and on the floor on image $c$ and $d$.}
 \end{center}
+\end{figure}
 
 We observe that images produced by our algorithm have less noise than the ones produced by the regular path tracing (for a same number of rays shot per pixel). The MSE values are lower for the top pictures, meaning that we converge faster to the reference image than standard path tracing does.
 

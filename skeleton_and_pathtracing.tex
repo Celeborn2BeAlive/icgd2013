@@ -100,6 +100,14 @@ We present a novel 3d curvilinear skeletonization algorithm which produces filte
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \label{sec::intro}
+\begin{figure}[t]
+\begin{center}
+\begin{tabular}{cc}
+	\myincludegraphics{0.60\textwidth}{dgci_ray_corridor.png} &
+	\myincludegraphics{0.40\textwidth}{dgci_compare_door.png}
+\end{tabular}
+\end{center}
+\end{figure}
 Path tracing algorithms are able to render photorealistic images from a scene description by simulating light propagation. The photorealistic aspect is achieved by simulating diffusion of light: elements of the scene which are illuminated by a light source can cast part of the light they receive. Consequently, parts of the scene which are not directly illuminated by any light source actually receive light, thus giving a realistic effect of light diffusion to the resulting image. 
 
 A path tracing algorithm sends rays (of light) from the camera (the viewpoint of the scene), and let them bounce around the scene until they encounter a light source. When a ray hits a point of an object (like a wall), it gathers information on the object's material. The ray is then reemitted in a random direction. Once a ray reaches a light source, the information it gathered through its journey in the scene is averaged in order to decide of the color of the first impact point. This color is then allocated to one of the pixels of the image, and the process is repeated for each pixel of the output image. To avoid \quotes{unrealistic} results due to an unusual reemission direction of a ray, the algorithm actually sends, for each pixel of the image, many rays: the more rays, the longer the algorithm will take to produce an image, but the more realistic the result will look. A path tracing can be seen as a random walk process through the scene.

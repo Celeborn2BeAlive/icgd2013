@@ -81,7 +81,7 @@
 \author{John Chaussard\inst{1} \and Laurent No\"{e}l\inst{2} \and Venceslas Biri\inst{2} \and Michel Couprie\inst{2}\thanks{This work has been partially supported by the \quotes{ANR-2010-BLAN-0205 KIDICO} project}}
 \institute{Universit\'{e} Paris 13, Sorbonne Paris Cit\'{e}, LAGA, CNRS(UMR 7539), \\ F-93430, Villetaneuse, France \\ \email{chaussard@math.univ-paris13.fr}
 \and
-Universit\'{e} Paris Est, LIGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, Cit\'{e} DESCARTES \\ BP 99  93162 Noisy le Grand CEDEX, France \\ \email{laurent.noel@esiee.fr, v.biri@esiee.fr, michel.couprie@esiee.fr}}
+Universit\'{e} Paris Est, LIGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, 93162 Noisy le Grand CEDEX, France \\ \email{laurent.noel@esiee.fr, v.biri@esiee.fr, michel.couprie@esiee.fr}}
 
 
 \maketitle
@@ -100,15 +100,7 @@ We present a novel 3d curvilinear skeletonization algorithm which produces filte
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \label{sec::intro}
-\begin{figure}[t]
-\begin{center}
-\begin{tabular}{cc}
-	\myincludegraphics{0.60\textwidth}{dgci_ray_corridor.png} &
-	\myincludegraphics{0.40\textwidth}{dgci_compare_door.png}
-\end{tabular}
-\caption{Images $a$ and $b$ shows some rays of the path tracing guided by the material of the objects (image $a$) or our skeleton based method (image $b$). Images $c$ and $d$ point out the noise reduction between the classic path tracing (image $c$) and our method (image $d$)}
-\end{center}
-\end{figure}
+
 Path tracing algorithms are able to render photorealistic images from a scene description by simulating light propagation. The photorealistic aspect is achieved by simulating diffusion of light: elements of the scene which are illuminated by a light source can cast part of the light they receive. Consequently, parts of the scene which are not directly illuminated by any light source actually receive light, thus giving a realistic effect of light diffusion to the resulting image. 
 
 A path tracing algorithm sends rays (of light) from the camera (the viewpoint of the scene), and let them bounce around the scene until they encounter a directly illuminated zone. When a ray hits a point of an object (like a wall), it gathers information on the object's material. The ray is then reemitted in a random direction. Once a ray reaches a light source, the information it gathered through its journey in the scene is averaged in order to decide of the color of the first impact point. This color is then allocated to one of the pixels of the image, and the process is repeated for each pixel of the output image. To avoid \quotes{unrealistic} results due to an unusual reemission direction of a ray, the algorithm actually sends, for each pixel of the image, many rays: the more rays, the longer the algorithm will take to produce an image, but the more realistic the result will look. A path tracing can be seen as a random walk process through the scene.
@@ -118,6 +110,16 @@ In order to avoid infinite bouncing of rays in the scene, a limit is set for the
 Our proposition is to reduce both the time taken by a path tracing algorithms and the noise in the output images by guiding rays towards the scene's light sources, thus reducing the number of rays \quotes{lost} during the computation. To do this, we perform some precomputation on the void space of the scene (the medium where the rays of light propagate) in order to have, later in the algorithm, a clue on towards which direction a ray should bounce in order to meet a light source. Such precomputation can take time and become more expensive than the original algorithm.
 
 To keep the precomputation fast, we perform it only on a subset of points of the voids of the scene. The precomputation we want to perform relies on paths and visibility tests, therefore want this set of points to be representative of both the topology and the geometry of the original scene. For example, it should possess branches propagating in the elongated parts of the scene. A filtered curvilinear skeleton of (the voids of) the scene meets all the required properties for our subset of points: it is a thin subset of points of the scene, with the same topology and retaining the main geometrical information of the scene. Note that in this application, the filtering of the skeleton (elimination of spurious branches) need to be both efficient and completely automatic, for one cannot ask a user to set parameters for each scene. 
+
+\begin{figure}[tb]
+\begin{center}
+\begin{tabular}{cc}
+	\myincludegraphics{0.60\textwidth}{dgci_ray_corridor.png} &
+	\myincludegraphics{0.40\textwidth}{dgci_compare_door.png}
+\end{tabular}
+\caption{Images $a$ and $b$ shows some rays of the path tracing guided by the material of the objects (image $a$) or our skeleton based method (image $b$). Images $c$ and $d$ point out the noise reduction between the classic path tracing (image $c$) and our method (image $d$)}
+\end{center}
+\end{figure}
 
 The purpose of this paper is twofold: we first introduce a new curvilinear skeletonization algorithm (Sec.~\ref{sec::skeletonization}) in the cubical complex framework (Sec.~\ref{sec::binary_to_cubic}), producing filtered skeletons without needing any user input (Sec.~\ref{sec::aspect_no_param}). 
 Then, we expose a new method, based on such skeletons, to enhance the results and the performance of a path tracing algorithm (see Sec.~\ref{sec::appli_pathtrace}).
@@ -201,7 +203,7 @@ We define $\border{X}$ as the set all faces belonging to a free pair for $X$. We
 
 On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, only faces located on the border of the complex are removed (l.~\ref{pc:07}). Thanks to corollary \ref{cor:parallel_removal_v2}, we can remove faces with same direction and orientation in parallel (l.~\ref{pc:08}), while guaranteeing topology preservation. Figure \ref{fig::example_algo} depicts the first steps of the algorithm.
 
-\begin{algorithm}[ht!]
+\begin{algorithm}[tb]
 \label{algo::pardircollapse_v0}
 \SetKwFor{ForAll}{for all}{do}{end}
 \caption[ParDirCollapse]{$ParDirCollapse(X,W,\ell)$}
@@ -228,7 +230,7 @@ On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, on
 \end{algorithm}
 
 
-\begin{figure}[htp]
+\begin{figure}[tb]
 \begin{center}
 \begin{tabular}{ccccc}
 	\myincludegraphics{0.19\textwidth}{invader.pdf} &
@@ -244,11 +246,11 @@ On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, on
 
 
 Different definitions of orientation and direction can be given, each corresponding to a different order of free faces removal in the complex and leading to different results.
-Algorithm~\ref{algo::pardircollapse_v0} can be implemented to run in linear time complexity (proportionally to the number of faces in the complex). Indeed, checking if a face is free or not may be easily done in constant time. Moreover, when a free pair $(f,g)$ is removed from the input complex, it is sufficient to scan the faces contained in $f$ in order to find new free faces.
+Algorithm~\ref{algo::pardircollapse_v0} can be implemented to run in linear time complexity (proportionally to the number of faces in the complex). Indeed, checking if a face is free or not may be easily done in constant time and when a free pair $(f,g)$ is removed from the input complex, it is sufficient to scan the faces contained in $f$ in order to find new free faces.
 
 
 
-\section{Aspect preservation during thinning: a parameter-free method}
+\section{Aspect preservation during thinning}
 \label{sec::aspect_no_param}
 As previously said, our goal is to use the skeleton of the voids of a scene in order to guide light rays from the camera of the scene towards the light. Moreover, this skeleton needs to capture the main geometrical features of the original scene. For example, if the input is a corridor (the void of the corridor), then the skeleton should be a line following the main direction of the corridor.
 
@@ -333,7 +335,7 @@ Given $Y \subset \allfaces{n}$, we set $S = \V2C^{-1}(Y \inter \subfaces{n}{n})$
 Informally, if $f$ is a 3-face, then $\cplDist1{Y}(f)$ is the length of the shortest 1-path between the voxel \quotes{corresponding} to $f$ and the set of voxels corresponding to $Y$.
 The same way, we define $\cplDD1{Y}$ and $\cpldecent{Y}$.
 
-\begin{figure}[htp]
+\begin{figure}[tb]
 \begin{center}
 \begin{tabular}{cccc}
 	\myincludegraphics{0.22\textwidth}{fish.pdf} &
@@ -346,14 +348,13 @@ The same way, we define $\cplDD1{Y}$ and $\cpldecent{Y}$.
 \end{figure}
 
 
-\subsection{Parameter-free thinning based on the lifespan, opening function and decenterness}
+\subsection{Parameter-free filtered thinning}
 As previously said, we add edges to the set $W$ of Alg.~\ref{algo::pardircollapse_v0} in order to retain, in the resulting curvilinear skeleton, important edges from the original object. Given a cubical complex $X$, if an edge of $X$ has a high decenterness value for $X$, then it is probably located too close to the border of $X$ and does not represent an interesting geometrical feature to preserve.
-%TODO ref vers image de decenterness
 On the other hand, if an edge has a high lifespan for $X$, then it means it was not removed quickly, after becoming a facet, by the thinning algorithm and might represent some precious geometrical information on the original object. An idea would be to keep, during thinning, all edges whose lifespan is superior to the decenterness value. Unfortunately, this strategy produces skeletons with many spurious branches in surfacic areas of the original object.
 
 We can identify surfacic areas of a complex as zones where squares have a high lifespan. Therefore, in order to avoid spurious branches in surfacic areas, we need to make it harder for edges to be preserved in these zones. It can be achieved by deciding that an edge will be kept safe from deletion by the thinning algorithm if its lifespan is superior to the decenterness value plus the lifespan of squares \quotes{around} this edge. This leads us to proposing Alg.~\ref{algo::3d_curvskel}. 
 
-\begin{algorithm}[ht]
+\begin{algorithm}[tb]
 \label{algo::3d_curvskel}
 \caption[CurvilinearSkeleton]{$CurvilinearSkeleton(X)$}
 \KwData{A cubical complex $\complex{3}{X}$}
@@ -367,9 +368,9 @@ In order to understand what was realised on line \ref{curvskel:01} of Alg.~\ref{
 
 \subsection{Results}
 
-Algorithm \ref{algo::3d_curvskel} allows to obtain a filtered curvilinear skeleton from a three dimensional complex. The results presented in Fig.~\ref{fig::result_skel} show that the skeletons contain the main geometrical information from the input shapes, and do not contain spurious branches.
+Algorithm \ref{algo::3d_curvskel} allows to obtain a filtered curvilinear skeleton from a three dimensional complex. The results presented in Fig.~\ref{fig::result_skel} show that the skeletons contain the main geometrical information from the input shapes, and no spurious branch.
 
-\begin{figure}[htp]
+\begin{figure}[tb]
 \begin{center}
 \begin{tabular}{cc|cc}
 	\myincludegraphics{0.18\textwidth}{hand2.jpg} &

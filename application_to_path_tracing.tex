@@ -49,13 +49,12 @@ In this section, we explain how to use the curvilinear skeleton of the voids of 
 Let $O$ be the origin of the camera in the scene. For each pixel $P$ of the final image, let $x$ be the nearest intersection point of the ray $(O, \overrightarrow{OP} = -\Theta)$ with an element of the scene. To obtain the luminosity, we must solve the rendering equation \cite{Ka86} which is a recursive integral equation. The integrand of the equation contains the radiance function that we must compute:
 
 \begin{align*}
-L(x \rightarrow \Theta) &= L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_s(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) d\omega_\Phi \\
-&= L_e(x \rightarrow \Theta) + L_r(x \rightarrow \Theta)
+L(x \rightarrow \Theta) &= L_e(x \rightarrow \Theta) + \int_{\Phi \in \Omega_x} f_s(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi) d\omega_\Phi
 \end{align*}
 
 $L$ is the radiance (a radiometric quantity that represents luminosity) from point $x$ toward direction $\Theta$. $L_e$ is the emitted radiance (non null only on light sources). The point $r(x, \Phi)$ is the nearest visible point from $x$ in the direction $\Phi$ of the hemisphere $\Omega_x$. The $f_s$ function expresses how much luminosity is exchanged, on point $x$, between an incoming ray $\Phi$ and the outgoing ray $\Theta$. Intuitively it represents the material properties of the surface at point $x$.
 
-This integrand expresses an intuitive idea: the reflected radiance from $x$ towards the camera is the result of computing all incoming luminosity on $x$ scaled by a factor which depends on the material on $x$ and the angle of the ray going from the camera to $x$. The most common method used to estimate the integral is the Monte-Carlo integration which provides the following:
+This integrand expresses an intuitive idea: the reflected radiance from $x$ towards the camera is the result of computing all incoming luminosity on $x$ scaled by a factor which depends on the material on $x$ and the angle of the ray going from the camera to $x$. The most common method used to estimate the integral, denoted by $L_r(x \rightarrow \Theta)$, is the Monte-Carlo integration which provides the following:
 
 \begin{equation*}
 \langle L_r(x \rightarrow \Theta) \rangle = \frac{f_s(x, \Theta \leftrightarrow \Phi) L(r(x, \Phi) \rightarrow -\Phi)}{p(\Phi)}
@@ -115,17 +114,17 @@ p_{skel}(\Phi) = \frac{s + 1}{2\pi} cos^s \alpha
 \end{equation*}
 
 with $\alpha$ the angle between $\overrightarrow{ximp_n}$ and $\Phi$, $s$ being a parameter called skeleton strength. The higher $s$ is, the more we sample close $\overrightarrow{ximp_n}$.
-\begin{figure}[thp]
+
+\subsection{Results and discussion}
+
+We present some results of our algorithm applied to four scenes. The first row shows our result and the second row shows a standard path tracing with the same input parameters. On each picture a MSE (mean square error) value with a reference image is shown.
+
+\begin{figure}[htp]
 \begin{center}
 \includegraphics[scale=0.17]{images/four_scenes_for_dgci.png}
 \caption{Four images comparing the classic path tracing (image $a$ and $c$) and our method (image $b$ and $d$). Note the noise reduction of our method in the left wall of images $a$ and $b$, and on the floor on image $c$ and $d$.}
 \end{center}
 \end{figure}
-
-
-\subsection{Results and discussion}
-
-We present some results of our algorithm applied to four scenes. The first row shows our result and the second row shows a standard path tracing with the same input parameters. On each picture a MSE (mean square error) value with a reference image is shown.
 
 We observe that images produced by our algorithm have less noise than the ones produced by the regular path tracing (for a same number of rays shot per pixel). The MSE values are lower for the top pictures, meaning that we converge faster to the reference image than standard path tracing does.
 

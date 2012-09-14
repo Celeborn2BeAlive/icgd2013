@@ -108,34 +108,37 @@ Let $n$ be a node of the skeleton and $V_n$ the set of visible nodes from $n$ al
 \subsubsection{Sampling according to $L$}
 
 Given a point $x$ and a direction $\Theta$ we want to compute $L(x \rightarrow \Theta)$ and then sample the hemisphere $\Omega_x$. We search for the nearest skeleton node $n$ and its importance point $imp_n$. We sample the hemisphere with a power-cosine pdf centered on $\overrightarrow{ximp_n}$:
-
 \begin{equation*}
 p_{skel}(\Phi) = \frac{s + 1}{2\pi} cos^s \alpha
 \end{equation*}
-
 with $\alpha$ the angle between $\overrightarrow{ximp_n}$ and $\Phi$, $s$ being a parameter called skeleton strength. The higher $s$ is, the more we sample close $\overrightarrow{ximp_n}$.
 
 \subsection{Results and discussion}
 
-We present some results of our algorithm applied to four scenes. The first row shows our result and the second row shows a standard path tracing with the same input parameters. On each picture a MSE (mean square error) value with a reference image is shown.
+Some results are presented in figure~\ref{fig:results} where we can see the decrease in noise compare to the regular path tracing. We computed the MSE value for different scenes that are presented in table~\ref{tab:timing}
 
-\begin{figure}[htp]
+\begin{figure}[tbhp]
 \begin{center}
 \includegraphics[scale=0.17]{images/four_scenes_for_dgci.png}
 \caption{\label{fig:results}Four images comparing the classic path tracing (image $a$ and $c$) and our method (image $b$ and $d$). Note the noise reduction of our method in the left wall of images $a$ and $b$, and on the floor on image $c$ and $d$.}
 \end{center}
 \end{figure}
 
-<<<<<<< HEAD
-
-\subsection{Results and discussion}
-
-=======
-We observe that images produced by our algorithm have less noise than the ones produced by the regular path tracing (for a same number of rays shot per pixel). The MSE values are lower for the top pictures, meaning that we converge faster to the reference image than standard path tracing does.
-
-This image is a zoom that allows us to see more precisely the the reduction of noise for our method.
->>>>>>> 4401d48cfde9ac89ee42f07c56ceedf42d89dfe6
+\begin{table}[t!]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+Scene & fig.\ref{fig:redcorridor} & fig.\ref{fig:examples} far left & fig.\ref{fig:examples} far right \\
+\hline
+MSE 100& 145 / 57 & 301 / 156 & 881 / 826 \\
+\hline
+MSE 40& 434 / 260 & 924 / 628 & 2678 / 2570 \\
+\hline
+\end{tabular}
+\caption{Timing(s) to reach an MSE of 100 and 40 against reference images. In each cell, the left number is for the standard path tracing, the right one  our method}
+\label{tab:timing}
+\end{table}
 
 \section{Conclusion}
 
-We presented an application of our skeletonization algorithm for global illumination. Our strategy works well, it reduces noise by taking into account the distribution of energy in the scene. One of the problems is that we take into account only one importance direction for sampling, totally ignoring the BRDF and the cosine factor. A solution called Multiple Importance Sampling will allow us to combine different strategies into one.
+We presented in this article a new skeletonization algorithm that both preserves geometrical features of objects and produces a pure curvilinear skeleton. These two properties allow us to improve the path tracing algorithm in guiding the rays towards the main illuminated area of the scene. Our algorithm is faster and produce less noise than the classical path tracing method.

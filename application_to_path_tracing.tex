@@ -86,19 +86,19 @@ The term $L$, which represents the distribution of light in the scene, is unknow
 
 \subsubsection{Construction of the importance points}
 
-The skeleton of the voids of the scene is computed using Alg.~\ref{algo::3d_curvskel} and is converted to a graph (the nodes are the 0-faces and the edges are the 1-faces). We then compute a set of \myem{importance points}, which will be used to sample $\Omega_x$ in the path tracing algorithm. To each node $n$ of the skeleton, one importance point $imp_n$ is computed. Intuitively, the importance point associated to $n$ is the direction to follow in order to find a light source.
+The skeleton of the voids of the scene is computed using Alg.~\ref{algo::3d_curvskel} (as shown on Fig.~\ref{fig::example_imp} on the right) and is converted to a graph (the nodes are the 0-faces and the edges are the 1-faces). We then compute a set of \myem{importance points}, which will be used to sample $\Omega_x$ in the path tracing algorithm. To each node $n$ of the skeleton, one importance point $imp_n$ is computed. Intuitively, the importance point associated to $n$ is the direction to follow in order to find a light source.
 
 %La, pas clair !!!
 Let $L$ be a light source of the scene and $n_L$ the nearest node of the skeleton that is visible by $L$. For each node, we compute the shortest path to $n_L$ along the skeleton. To do so, we use the Dijkstra algorithm and weight the edges of the skeleton depending on a visibility criteria: the weight of an edge $e$ is $1$ if $e$ is visible from $n_L$ and $10$ else. It results that the paths that are illuminated by a light will be shorter than paths located in dark areas.
 
-Let $n$ be a node of the skeleton and $V_n$ the set of visible nodes from $n$ along the shortest path toward $n_L$. The importance point $imp_n$ associated to $n$ is the barycenter of $V_n$. An example is shown on Fig.~\ref{fig::example_imp}.
+Let $n$ be a node of the skeleton and $V_n$ the set of visible nodes from $n$ along the shortest path toward $n_L$. The importance point $imp_n$ associated to $n$ is the barycenter of $V_n$. An example is shown on Fig.~\ref{fig::example_imp} on the left.
 
 
 \begin{figure}[tb]
 \begin{center}
-\begin{tabular}{c|c}
-	\myincludegraphics{0.3\textwidth}{graph_heuristic.pdf} &
-	\myincludegraphics{0.3\textwidth}{graph_heuristic.pdf} \\
+\begin{tabular}{l|r}
+	\myincludegraphics{0.3\textwidth}{graph_heuristic.pdf} ~~~~~~&
+	~~~~~~ \myincludegraphics{0.6\textwidth}{skel.jpg} \\
 \end{tabular}
 \caption[Example of importance point construction]{\label{fig::example_imp} \textbf{On the left}, we illustrate the importance point $imp_n$ associated to a node $n$. The dotted black line shows the closest node to $n$ not included in $V_n$. \textbf{On the right}, an example of the curvilinear skeleton (in red) obtained in the Sponza scene.}
 \end{center}
@@ -129,7 +129,7 @@ Some results are presented on Fig.~\ref{fig:results} and Fig.~\ref{fig::intro_im
 \centering
 \begin{tabular}{|c|c|c|c|}
 \hline
-Scene & fig.\ref{fig:redcorridor} & fig.\ref{fig:examples} far left & fig.\ref{fig:examples} far right \\
+Scene & Corridor & Sponza 1 & Sponza 2 (Fig. \ref{fig:results}) \\
 \hline
 MSE 100& 145 / 57 & 301 / 156 & 881 / 826 \\
 \hline

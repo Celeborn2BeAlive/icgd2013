@@ -111,7 +111,7 @@ We present a novel 3d curvilinear skeletonization algorithm which produces filte
 \end{figure}
 Path tracing algorithms are able to render photorealistic images from a scene description by simulating light propagation. The photorealistic aspect is achieved by simulating diffusion of light: elements of the scene which are illuminated by a light source can cast part of the light they receive. Consequently, parts of the scene which are not directly illuminated by any light source actually receive light, thus giving a realistic effect of light diffusion to the resulting image. 
 
-A path tracing algorithm sends rays (of light) from the camera (the viewpoint of the scene), and let them bounce around the scene until they encounter a light source. When a ray hits a point of an object (like a wall), it gathers information on the object's material. The ray is then reemitted in a random direction. Once a ray reaches a light source, the information it gathered through its journey in the scene is averaged in order to decide of the color of the first impact point. This color is then allocated to one of the pixels of the image, and the process is repeated for each pixel of the output image. To avoid \quotes{unrealistic} results due to an unusual reemission direction of a ray, the algorithm actually sends, for each pixel of the image, many rays: the more rays, the longer the algorithm will take to produce an image, but the more realistic the result will look. A path tracing can be seen as a random walk process through the scene.
+A path tracing algorithm sends rays (of light) from the camera (the viewpoint of the scene), and let them bounce around the scene until they encounter a directly illuminated zone. When a ray hits a point of an object (like a wall), it gathers information on the object's material. The ray is then reemitted in a random direction. Once a ray reaches a light source, the information it gathered through its journey in the scene is averaged in order to decide of the color of the first impact point. This color is then allocated to one of the pixels of the image, and the process is repeated for each pixel of the output image. To avoid \quotes{unrealistic} results due to an unusual reemission direction of a ray, the algorithm actually sends, for each pixel of the image, many rays: the more rays, the longer the algorithm will take to produce an image, but the more realistic the result will look. A path tracing can be seen as a random walk process through the scene.
 
 In order to avoid infinite bouncing of rays in the scene, a limit is set for the number of bounces a ray can do. If a ray does not reach any light source after a given number of bounces, it is eliminated from the scene. A lost ray is as a waste of computation time, and minimizing this loss would speed up the algorithm.
 
@@ -158,6 +158,8 @@ Let $\complex{n}{X}$, and let $(f,g)$ be a free pair for $X$. The complex $X \se
 
 Let $\complex{n}{Y}$, the complex $X$ \myem{collapses onto} $Y$ if there exists a sequence of complexes $(X_0,...,X_\ell)$ of $\allfaces{n}$ such that $X=X_0$, $Y=X_\ell$ and for all $i \in \dinterval{1}{\ell}, X_{i}$ is an elementary collapse of $X_{i-1}$. We also say, in this case, that $Y$ \myem{is a collapse of} $X$.
 \end{definition}
+
+Recent works in the cubical complex framework brought new parallel thinning algorithms in the voxel framework (\cite{BertrandCouprie06}, \cite{Ber07}).
 
 \section{A parallel directional thinning based on cubical complex}
 \label{sec::skeletonization}
@@ -248,13 +250,13 @@ Algorithm~\ref{algo::pardircollapse_v0} can be implemented to run in linear time
 
 \section{Aspect preservation during thinning: a parameter-free method}
 \label{sec::aspect_no_param}
-As previously said, our goal is to use the skeleton of a scene in order to guide light rays from the camera of the scene towards the light. In order to achieve this objective, we need a skeleton which captures the main geometrical features of the original scene it was calculated from. 
+As previously said, our goal is to use the skeleton of the voids of a scene in order to guide light rays from the camera of the scene towards the light. Moreover, this skeleton needs to capture the main geometrical features of the original scene. For example, if the input is a corridor (the void of the corridor), then the skeleton should be a line following the main direction of the corridor.
 
-For example, if the input is a corridor (the void of the corridor), then the skeleton should be a line following the main direction of the corridor. 
-However, Alg.~\ref{algo::pardircollapse_v0} does not necessarily preserve geometrical features of the input object in the resulting skeleton, which end up being a single vertex.
-Moreover, when one wants to preserve geometrical information from the original shape in the skeleton, then it is important to not retain \quotes{too much information} during thinning in order to avoid noisy branches in the skeleton.
+Generally, two strategies are possible to achieve this goal: find, during the skeletonization process, points whose neighbourhood configuration seems interesting and keep them in the result \cite{CouCoeurZrour07} \cite{HR08} \cite{CCT09ext}), or choose, before skeletonization, interesting points of the object which should remain untouched, based on a function on these points and a filtering parameter \cite{BertrandCouprie06} \cite{Pal07}. 
 
-In the following, we introduce a new method in the cubical complex framework, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory geometrical properties. This will be achieved by adding, in the set $W$ of Alg.~\ref{algo::pardircollapse_v0}, some faces from the original object during the thinning process.
+Algorithm ~\ref{algo::pardircollapse_v0} does not necessarily preserve geometrical features of the input object in the resulting skeleton, which end up being a single vertex.
+
+In the following, we introduce a new method in the cubical complex framework, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory geometrical properties. Our method is based on the two previously listed strategies: its finds, during thinning, elements whose neighbourhood configuration is interesting, and uses a function on these elements to decide to preserve them in the result.
 
 \subsection{The lifespan of a face}
 In the following, we define additional functions in the cubical complex, related to the thinning process (Alg.~\ref{algo::pardircollapse_v0}), which are essential for the filtering step of the skeletonization. The first one we present is the \myem{death date} of a face.

@@ -32,8 +32,6 @@ dans le texte, si c'est pas le cas autant les enlever non ?
 distance strictly lower than 1. Did you meant "is equal to 1" instead of "is equal or inferior to 1"? (I assume this
 was only because the common sentence is "is equal of inferior to a distance n>1")
 
-REMARQUE: il est con, les points voisins en diagonale ont une distance de racine de 2 entre eux....
-
 ­
  p. 7, §1: The maximal 1­ball *of* $S$..": I suggest to replace "of" by "in".
 ­

@@ -77,7 +77,7 @@
 
 \mainmatter
 
-\title{A 3d curvilinear skeletonization algorithm with application to path tracing}
+\title{A 3D curvilinear skeletonization algorithm with application to path tracing}
 \author{John Chaussard\inst{1} \and Laurent No\"{e}l\inst{2} \and Venceslas Biri\inst{2} \and Michel Couprie\inst{2}\thanks{This work has been partially supported by the \quotes{ANR-2010-BLAN-0205 KIDICO} project}}
 \institute{Universit\'{e} Paris 13, Sorbonne Paris Cit\'{e}, LAGA, CNRS(UMR 7539), \\ F-93430, Villetaneuse, France \\ \email{chaussard@math.univ-paris13.fr}
 \and
@@ -88,7 +88,7 @@ Universit\'{e} Paris Est, LIGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, 93162 
 
 
 \begin{abstract}
-We present a novel 3d curvilinear skeletonization algorithm which produces filtered skeletons without needing any user input, thanks to a new parallel algorithm based on the cubical complex framework. These skeletons are used a new path tracing algorithm in order to produce less noisy images in less time than the classical approach.
+We present a novel 3D curvilinear skeletonization algorithm which produces filtered skeletons without needing any user input, thanks to a new parallel algorithm based on the cubical complex framework. These skeletons are used in a new path tracing algorithm in order to produce less noisy images in less time than the classical approach.
 \end{abstract}
 
 
@@ -103,9 +103,9 @@ We present a novel 3d curvilinear skeletonization algorithm which produces filte
 
 Path tracing algorithms~\cite{Ka86,LW93} are able to render photorealistic images from a scene description by simulating light propagation. The photorealistic aspect is achieved by simulating diffusion of light: elements of the scene which are illuminated by a light source can cast part of the light they receive. Consequently, parts of the scene which are not directly illuminated by any light source actually receive light, thus giving a realistic effect of light diffusion to the resulting image. 
 
-A path tracing algorithm sends rays from the camera, and let them bounce around the scene until they encounter a directly illuminated zone. When a ray hits a point of any surface, it is reemitted in a random direction. Once it reaches a directly illuminated area, all luminance gathered through its journey in the scene is averaged in order to set one of the image pixels, a process repeated for each pixel of the output image. To avoid the noise resulting from this stochastic process, the algorithm actually sends many rays for each pixel of the image: the more rays, the longer the algorithm will take to produce an image, but the more realistic the result will look. A path tracing can be seen as a random walk process through the scene.
+A path tracing algorithm sends rays from the camera, and let them bounce around the scene until they encounter a directly illuminated zone. When a ray hits a point of any surface, it is reemitted in a random direction. Once it reaches a directly illuminated area, all luminance gathered through its journey in the scene is averaged in order to set one of the image pixels, a process repeated for each pixel of the output image. To reduce the noise resulting from this stochastic process, the algorithm actually sends many rays for each pixel of the image: the more rays, the longer the algorithm will take to produce an image, but the more realistic the result will look. A path tracing can be seen as a random walk process through the scene.
 
-In order to avoid infinite bouncing of rays in the scene, a limit is set for the number of bounces a ray can do. If a ray does not reach any directly illuminated area after a given number of bounces, its contribution is null. Such lost ray is a waste of computation time, and minimizing this loss would speed up the algorithm (see Fig~\ref{fig::intro_image}.a).
+In order to avoid infinite bouncing of rays in the scene, a limit is set for the number of bounces a ray can do. If a ray does not reach any directly illuminated area after a given number of bounces, its contribution is considered null. Such lost ray is a waste of computation time, and minimizing this loss would speed up the algorithm (see Fig~\ref{fig::intro_image}.a).
 
 Our proposition is to reduce both the time taken by a path tracing algorithms and the noise in the output images by guiding rays towards the scene's light sources (see Fig~\ref{fig::intro_image}.b), thus reducing the number of rays \quotes{lost} during the computation. To do this, we perform some precomputation on the void space of the scene (the medium where the rays of light propagate) in order to have, later in the algorithm, a clue on the direction a ray should bounce in order to meet an illuminated area. Unfortunately, such precomputation may take time and become more expensive than the original algorithm.
 
@@ -128,7 +128,7 @@ Then, we expose a new method, based on such skeletons, to enhance the results (s
 \section{The cubical complex framework}
 \label{sec::binary_to_cubic}
 
-In the 3d voxel framework, objects are made of voxels. In the 3d cubical complex framework, objects are made of cubes, squares, lines and vertices. 
+In the 3D voxel framework, objects are made of voxels. In the 3D cubical complex framework, objects are made of cubes, squares, lines and vertices. 
 Let $\Z$ be the set of integers, we consider the family of sets $\mathbb{F}^1_0$ and $\mathbb{F}^1_1$, such that $\mathbb{F}^1_0 = \{\{a\} \suchthat a \in \Z\}$ and $\mathbb{F}^1_1 = \{ \{a, a+1\} \suchthat a \in \Z\}$. Any subset $f$ of $\Z^n$ such that $f$ is the cartesian product of $m$ elements of $\mathbb{F}^1_1$ and $(n-m)$ elements of $\mathbb{F}^1_0$ is called a face or an \myem{$m$-face} of $\Z^n$, $m$ is the dimension of $f$, we write $dim(f)=m$. A $0$-face is called a \myem{vertex}, a $1$-face is an \myem{edge}, a $2$-face is a \myem{square}, and a $3$-face is a \myem{cube}.
 
 We denote by $\allfaces{n}$ the set composed of all faces in $\Z^n$. Given $m \in \dinterval{0}{n}$, we denote by $\subfaces{n}{m}$ the set composed of all $m$-faces in $\Z^n$.
@@ -142,11 +142,11 @@ Any subset $Y$ of $X$ which is also a complex is a \myem{subcomplex of $X$}, and
 \end{definition}
 
 
-%Informally, in 3d, a set of faces $X$ is a complex if each side (square) of a cube of $X$ also belong to $X$, each edge of a square of $X$ also belong to $X$, and each vertex of an edge of $X$ also belong to $X$. 
+%Informally, in 3D, a set of faces $X$ is a complex if each side (square) of a cube of $X$ also belong to $X$, each edge of a square of $X$ also belong to $X$, and each vertex of an edge of $X$ also belong to $X$. 
 
 A face $f \in X$ is \myem{a facet of $X$} if $f$ is not a proper face of any face of $X$. The \myem{dimension of $X$} is $\mydim{X} = \max\{\mydim{f} \suchthat f \in X\}$. If $\mydim{X} = d$, then we say that $X$ is a $d$-complex.
 
-Traditionally, a binary image is a finite subset of $\Zset^n$ (called voxel image when $n=3$). To transpose such image to the cubical complex framework, we associate to each element of $S\subseteq \Zset^n$ an n-face of $\allfaces{n}$. Let $x=(x_1,...,x_n) \in S$, we define the n-face $\V2C(x) = \{x_1, x_1 + 1\} \times \ldots \times \{x_n, x_n + 1\}$. We can extend the map $\V2C$ to sets: $\V2C(S)=\{\V2C(x) | x \in S\}$. Given a set $S \subset \Zset^n$, we associate to it the cubical complex $\closure{\V2C(S)}$.
+Traditionally, a binary image is a finite subset of $\Zset^n$ (called voxel image when $n=3$). To transpose such an image $S$ to the cubical complex framework, we associate to each element of $S\subseteq \Zset^n$ an n-face of $\allfaces{n}$. Let $x=(x_1,...,x_n) \in S$, we define the n-face $\V2C(x) = \{x_1, x_1 + 1\} \times \ldots \times \{x_n, x_n + 1\}$. We can extend the map $\V2C$ to sets: $\V2C(S)=\{\V2C(x) | x \in S\}$. Given a set $S \subset \Zset^n$, we associate to it the cubical complex $\closure{\V2C(S)}$.
 
 The collapse operation is the basic operation for performing homotopic thinning of a complex, and consists of removing two distinct faces $(f,g)$ from a complex $X$ under the condition that they form a free pair:
 
@@ -298,7 +298,7 @@ In addition to the lifespan of a face, the proposed homotopic thinning method us
 
 Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal or inferior to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. 
 
-We set $\dist1(x,y)$ as the length of a shortest $1$-path from $x$ to $y$; remark that $\dist1$ is indeed the $6$-distance in the 3d voxel framework. Let $S \subset \Zset^n$, we set $\Compl{S} = \Zset^n \setminus S$, and for all $x \in \Zset^n$, the map $\Dist1{S}: \Zset^n \rightarrow \Nset$ is such that $\Dist1{S}(x) = \displaystyle \min_{y \in \Compl{S}} \dist1(x,y)$. 
+We set $\dist1(x,y)$ as the length of a shortest $1$-path from $x$ to $y$; remark that $\dist1$ is indeed the $6$-distance in the 3D voxel framework. Let $S \subset \Zset^n$, we set $\Compl{S} = \Zset^n \setminus S$, and for all $x \in \Zset^n$, the map $\Dist1{S}: \Zset^n \rightarrow \Nset$ is such that $\Dist1{S}(x) = \displaystyle \min_{y \in \Compl{S}} \dist1(x,y)$. 
 
 The \myem{maximal $1$-ball of $S$ centered on $x$} is the set $\MaxOneBall{S}(x)=\{y \in \Zset^n | \dist1(x,y) < \Dist1{S}(x)\}$.
 We set, for all $x \in S$, the map $\DD1{S}: \Zset^n \rightarrow \Nset$ such that $\DD1{S}(x) = \displaystyle \max_{x \in \MaxOneBall{S}(y)} \Dist1{S}(y)$: this value indicates the radius of the largest maximal $1$-ball contained in $S$ and containing $x$. If $x \in \Compl{S}$, we set $\DD1{S}(x) = 0$. The map $\DD1{S}$ is known as the opening function of $S$ based on the $1$-distance (also called the granulometry function) \cite{Matheron67}: it allows to compute efficiently results of morphological openings by balls of various radius, and gives information on the local thickness of an object.

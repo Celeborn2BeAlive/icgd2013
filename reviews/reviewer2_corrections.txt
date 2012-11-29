@@ -1,0 +1,55 @@
+The discussion in Sction 5.2 assumes some things. For example, if there are different sources of light and the
+image is quite symmetric, it may easily happen that imp_n=n. In this case the discussion does not go through.
+Also, I get the feeling that the presentation is tailored to ONE light source. It would be better to make clear in
+the discussion that the method works for several light­sources.
+
+REMARQUE: on utilise toujours qu'un seul plus court chemin, celui qui va vers la lumière la plus proche (bien que ça
+soit une mauvaise stratégie). Dans ce cas imp_n ne peux pas être n (par construction du squelette tous les voisins
+d'un noeuds sont visibles par ce noeud et donc s'il existe un plus court chemin, imp_n sera au moins un des voisins
+du noeud)
+
+
+In the experiments, there is a significant speed up in most cases, but in Sponza 2. Is there any explanation for
+this difference in the behavior of the speed up?
+
+REMARQUE: j'en sais rien xD
+
+
+Do not use $d$ in definition 7 because $d$ is already used in the Algorithm. (It is confusing.)
+
+REMARQUE: à toi de choisir une autre lettre ! :p
+
+
+Why do not define d(x,y) as the L_1­distance instead of using a graph­based distance?
+
+REMARQUE: à mon sens la distance basée graphe est plus valide puisque la L_1 distance risque de représenter celle d'un chemin
+ne passant pas dans le vide. Au moins on est sur que notre distance est une borne supérieure de la véritable distance du plus
+court chemin passant dans le vide entre les deux noeuds (à noter que je crois avoir lu récemment que le calcul de cette vrai
+distance est un problème NP-difficile en 3D)
+
+
+Why do you call the skeleton curvilinear? What is curvilinear about it?
+
+REMARQUE: Il faut préciser que c'est une courbe 1D plongée dans l'espace 3D du vide ?
+
+
+The path­tracing algorithm is quite standard and I assume that it appears in textbooks of Comp Graphics. I
+would suggest referring to one such book (perhaps instead of [8], but both references would also be ok.).
+
+REMARQUE: la ref [8] est parfaite à mon sens.
+
+
+The English of the paper is not very polished. Here there is a partial list:
+­
+=>CORRIGE: page 3, line 8: ")" is missing.
+­
+=>CORRIGE: Def 3: "Let Y..., the complex X collapses....". These are two different sentences and there should be a period
+between them, not a comma.
+­
+-I do not understand the 3rd paragraph of Section 4.
+­
+=>CORRIGE (cf reviewer1): "its finds"
+­
+-"elements [whose ...] is interesting"
+
+REMARQUE: j'ai pas compris ce qu'il veut là...

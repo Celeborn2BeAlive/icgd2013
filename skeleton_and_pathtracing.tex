@@ -129,10 +129,10 @@ Then, we expose a new method, based on such skeletons, to enhance the results (s
 \label{sec::binary_to_cubic}
 
 In the 3D voxel framework, objects are made of voxels. In the 3D cubical complex framework, objects are made of cubes, squares, lines and vertices. 
-Let $\Z$ be the set of integers, we consider the family of sets $\mathbb{F}^1_0$ and $\mathbb{F}^1_1$, such that $\mathbb{F}^1_0 = \{\{a\} \suchthat a \in \Z\}$ and $\mathbb{F}^1_1 = \{ \{a, a+1\} \suchthat a \in \Z\}$. Any subset $f$ of $\Z^n$ such that $f$ is the cartesian product of $m$ elements of $\mathbb{F}^1_1$ and $(n-m)$ elements of $\mathbb{F}^1_0$ is called a face or an \myem{$m$-face} of $\Z^n$, $m$ is the dimension of $f$, we write $dim(f)=m$. A $0$-face is called a \myem{vertex}, a $1$-face is an \myem{edge}, a $2$-face is a \myem{square}, and a $3$-face is a \myem{cube}.
+Let $\Z$ be the set of integers, we consider the family of sets $\mathbb{F}^1_0$ and $\mathbb{F}^1_1$, such that $\mathbb{F}^1_0 = \{\{a\} \suchthat a \in \Z\}$ and $\mathbb{F}^1_1 = \{ \{a, a+1\} \suchthat a \in \Z\}$. Any subset $f$ of $\Z^n$ such that $f$ is the Cartesian product of $m$ elements of $\mathbb{F}^1_1$ and $(n-m)$ elements of $\mathbb{F}^1_0$ is called a face or an \myem{$m$-face} of $\Z^n$, $m$ is the dimension of $f$, we write $dim(f)=m$. A $0$-face is called a \myem{vertex}, a $1$-face is an \myem{edge}, a $2$-face is a \myem{square}, and a $3$-face is a \myem{cube}.
 
 We denote by $\allfaces{n}$ the set composed of all faces in $\Z^n$. Given $m \in \dinterval{0}{n}$, we denote by $\subfaces{n}{m}$ the set composed of all $m$-faces in $\Z^n$.
-Let $f \in \allfaces{n}$. We set $\cell{f} = \{g \in \allfaces{n}\vert g \subseteq f\}$, and $\cellstrict{f} = \cell{f} \setminus \{f\}$. Any element of $\cell{f}$ (resp. $\cellstrict{f}$) is \myem{a face of $f$} (resp. \myem{a proper face of $f$}.
+Let $f \in \allfaces{n}$. We set $\cell{f} = \{g \in \allfaces{n}\vert g \subseteq f\}$, and $\cellstrict{f} = \cell{f} \setminus \{f\}$. Any element of $\cell{f}$ (resp. $\cellstrict{f}$) is \myem{a face of $f$} (resp. \myem{a proper face of $f$}).
 The \myem{closure} of a set of faces $X$ is the set $\closure{X}=\union\{\cell{f} \vert f \in X\}$.
 
 \begin{definition}
@@ -159,7 +159,7 @@ It can be easily seen that if $(f,g)$ is a free pair for a complex $X$, then $f$
 \begin{definition}
 Let $\complex{n}{X}$, and let $(f,g)$ be a free pair for $X$. The complex $X \setminus \{f,g\}$ is an \myem{elementary collapse of $X$}.
 
-Let $\complex{n}{Y}$, the complex $X$ \myem{collapses onto} $Y$ if there exists a sequence of complexes $(X_0,...,X_\ell)$ of $\allfaces{n}$ such that $X=X_0$, $Y=X_\ell$ and for all $i \in \dinterval{1}{\ell}, X_{i}$ is an elementary collapse of $X_{i-1}$. We also say, in this case, that $Y$ \myem{is a collapse of} $X$.
+Let $\complex{n}{Y}$. The complex $X$ \myem{collapses onto} $Y$ if there exists a sequence of complexes $(X_0,...,X_\ell)$ of $\allfaces{n}$ such that $X=X_0$, $Y=X_\ell$ and for all $i \in \dinterval{1}{\ell}, X_{i}$ is an elementary collapse of $X_{i-1}$. We also say, in this case, that $Y$ \myem{is a collapse of} $X$.
 \end{definition}
 
 Recent works in the cubical complex framework brought new parallel thinning algorithms in the voxel framework (\cite{BertrandCouprie06}, \cite{Ber07}).
@@ -303,7 +303,7 @@ We set $\dist1(x,y)$ as the length of a shortest $1$-path from $x$ to $y$; remar
 The \myem{maximal $1$-ball of $S$ centered on $x$} is the set $\MaxOneBall{S}(x)=\{y \in \Zset^n | \dist1(x,y) < \Dist1{S}(x)\}$.
 We set, for all $x \in S$, the map $\DD1{S}: \Zset^n \rightarrow \Nset$ such that $\DD1{S}(x) = \displaystyle \max_{x \in \MaxOneBall{S}(y)} \Dist1{S}(y)$: this value indicates the radius of a largest maximal $1$-ball contained in $S$ and containing $x$. If $x \in \Compl{S}$, we set $\DD1{S}(x) = 0$. The map $\DD1{S}$ is known as the opening function of $S$ based on the $1$-distance (also called the granulometry function) \cite{Matheron67}: it allows to compute efficiently results of morphological openings by balls of various radius, and gives information on the local thickness of an object.
 
-Given $S \subset \Zset^n$, the value of $\DD1{S}(x)$ of every $x \in S$ can be naively computed by performing successive morphological dilations of values of the map $\Dist1{S}$. A linear algorithm for computing the map $\DD1{S}$ (with regards to the size of the input image) was proposed in \cite{Chaussard_phd}, and will be explored further in details in a future paper.
+Given $S \subset \Zset^n$, the value of $\DD1{S}(x)$ of every $x \in S$ can be naively computed by performing successive morphological dilations of values of the map $\Dist1{S}$. A linear algorithm for computing the map $\DD1{S}$ (with regard to the size of the input image) was proposed in \cite{Chaussard_phd}, and will be explored further in details in a future paper.
 
 Finally, we define the \myem{decenterness map}:
 
@@ -312,7 +312,7 @@ Finally, we define the \myem{decenterness map}:
 Given $S \subset \Zset^n$, the \myem{decenterness map of $S$} is the map $\decent{S} = \DD1{S} - \Dist1{S}$.
 \end{definition}
 
-An exemple of these maps is shown on Fig.~\ref{fig::globalopening}.
+An example of these maps is shown on Fig.~\ref{fig::globalopening}.
 
 In order to extend all these previous maps defined in $\Zset^n$ to the cubical complex framework, we use the map $\V2C^{-1}$, inverse of the bijective map $\V2C : \Zset^{n} \rightarrow \subfaces{n}{n}$ defined in Sec.~\ref{sec::binary_to_cubic}. It is used to project any $n$-face of $\allfaces{n}$ into $\Zset^n$. This map induces a map from $\mathcal{P}(\subfaces{n}{n})$ to $\mathcal{P}(\Zset^n)$, that we also denote by $\V2C^{-1}$.
 
@@ -330,7 +330,7 @@ Given $Y \subset \allfaces{n}$, we set $S = \V2C^{-1}(Y \inter \subfaces{n}{n})$
 \bigskip
 
 Informally, if $f$ is a 3-face, then $\cplDist1{Y}(f)$ is the length of the shortest 1-path between the voxel \quotes{corresponding} to $f$ and the set of voxels corresponding to $Y$.
-The same way, we define $\cplDD1{Y}$ and $\cpldecent{Y}$.
+In the same way, we define $\cplDD1{Y}$ and $\cpldecent{Y}$.
 
 \begin{figure}[tb]
 \begin{center}

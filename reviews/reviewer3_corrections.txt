@@ -1,0 +1,36 @@
+This paper is an extended version of the short paper "Skeleton based importance sampling for path tracing" by
+V. Biri and J. Chaussard, EUROGRAPHICS 2012. 
+
+The use of cubical complexes instead of voxels seems to
+be the main novelty of the present paper. 
+
+REMARQUE: heu vous avez utilisez les CC aussi pour le papier à EG O_o
+
+On the other hand, this paper is much more  detailed and  reads well.
+
+
+Minor remarks:
+
+Abstract, l. 4: used in a new path tracing algorithm
+
+REMARQUE: je suppose qu'il veut qu'on enlève le "new" non ?
+
+=>CORRIGE: p. 3, l.1: Cartesian
+
+Algorithm 1: for t=1­­>n do
+
+=>CORRIGE (cf reviewer1): p. 5 l. ­3: it finds
+
+=>CORRIGE: p. 7 l. 11: with regard. l.17: example; 
+
+in Fig. 3. l. ­1: In the same way
+
+REMARQUE: pas compris ce qu'il veut
+
+=>CORRIGE: p. 9 : at point x; at x
+
+=>CORRIGE: p. 10: l. 5 gives. l. 19: don't­­> do not. l. ­18: preprocessing performed on it. 
+
+l. ­4: gives the direction  
+
+REMARQUE: pas trouvé

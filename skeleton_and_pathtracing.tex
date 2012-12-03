@@ -364,7 +364,8 @@ $W=\{f \in X | \lifespan{f}{X} > \cpldecent{X}(f) + \birth{f}{X} - \cplDist1{X}(
 
 In order to understand what was realised on line \ref{curvskel:01} of Alg.~\ref{algo::3d_curvskel}, we might point out that the birth date of an edge corresponds to the highest death date of the squares containing this edge. Moreover, the map $\cplDist1{X}$ gives, for all 3-faces of $X$, their death date (as the thinning algorithm naturally follows this map to eliminate cubes from a 3-complex). Therefore, for an edge $f$ of $X$, $\cplDist1{X}(f)$ informs us on the highest death date of cubes containing $f$, also equal to the highest birth date of squares containing $f$. In conclusion, $\birth{f}{X} - \cplDist1{X}(f)$ is an approximation of the lifespan of the squares containing $f$.
 
-Although the output of Alg.\ref{algo::3d_curvskel} may contain $2$-faces (depending on the topological properties of the input), the algorithm is said to be a \myem{curvilinear skeletonization} algorithm because it only adds $1$-faces (edges) in the inhibitor set $W$ (used for the visual aspect preservation step) (on line \ref{curvskel:01} of Alg.~\ref{algo::3d_curvskel}). For the same reason, we say that the output of Alg.~\ref{algo::3d_curvskel} is a \myem{curvilinear skeleton}.
+Although the output of Alg.\ref{algo::3d_curvskel} may contain $2$-faces, the algorithm is said to be a \myem{curvilinear skeletonization} algorithm because it only adds $1$-faces (edges) in the inhibitor set $W$ (used for the visual aspect preservation step) (on line \ref{curvskel:01} of Alg.~\ref{algo::3d_curvskel}).
+For the same reason, we say that the output of Alg.~\ref{algo::3d_curvskel} is a \myem{curvilinear skeleton}. In Sec.~\ref{sec::appli_pathtrace}, the outputs of Alg.~\ref{algo::3d_curvskel} were always one dimensional complexes.
 
 \subsection{Results}
 

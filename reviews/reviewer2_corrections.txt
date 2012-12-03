@@ -3,21 +3,18 @@ image is quite symmetric, it may easily happen that imp_n=n. In this case the di
 Also, I get the feeling that the presentation is tailored to ONE light source. It would be better to make clear in
 the discussion that the method works for several light­sources.
 
-REMARQUE: on utilise toujours qu'un seul plus court chemin, celui qui va vers la lumière la plus proche (bien que ça
-soit une mauvaise stratégie). Dans ce cas imp_n ne peux pas être n (par construction du squelette tous les voisins
-d'un noeuds sont visibles par ce noeud et donc s'il existe un plus court chemin, imp_n sera au moins un des voisins
-du noeud)
+??? Que répondre ? Ca marche avec plusieurs sources ?
 
 
 In the experiments, there is a significant speed up in most cases, but in Sponza 2. Is there any explanation for
 this difference in the behavior of the speed up?
 
-REMARQUE: j'en sais rien xD
+??? Qu'en pense vence ? Le point de vue est-il différent ? C'est laquelle Sponza1 et laquelle Sponza 2 ?
 
 
 Do not use $d$ in definition 7 because $d$ is already used in the Algorithm. (It is confusing.)
 
-REMARQUE: à toi de choisir une autre lettre ! :p
+CORRIGE => We used delta instead
 
 
 Why do not define d(x,y) as the L_1­distance instead of using a graph­based distance?
@@ -27,16 +24,23 @@ ne passant pas dans le vide. Au moins on est sur que notre distance est une born
 court chemin passant dans le vide entre les deux noeuds (à noter que je crois avoir lu récemment que le calcul de cette vrai
 distance est un problème NP-difficile en 3D)
 
+REMARQUE John : je crois qu'il veut parler de la distance d(x,y) définie en 4.2
+
+Answer : indeed, d(x,y) (defined in sec. 4.2) is the L_1 distance. In order to make sure the reader correctly understands this fact, we prefered to explicitly define such distance but, as you point out, it may confuse the reader already familiar with such distance, and uses also place (that is very precious for us). We changed this part in order to shorten it and refer to L1.
+
 
 Why do you call the skeleton curvilinear? What is curvilinear about it?
 
-REMARQUE: Il faut préciser que c'est une courbe 1D plongée dans l'espace 3D du vide ?
+Answer : the skeleton is called curvilinear because the skeletonization algorithm preserve, in the visual aspect preservation step, only edges. Surfaces may appear if the topology of the object requires it : in this case, these surfaces were not preserved for geometrical reasons, but for topological reasons. Surfacic skeletons also exist : in this case, surfaces may be preserved during the visual aspect preservation step. Our algorithm in a curvilinear skeletonization algorithm.
+We explained why this terminology choice in the article, at the end of section 4.3.
 
 
 The path­tracing algorithm is quite standard and I assume that it appears in textbooks of Comp Graphics. I
 would suggest referring to one such book (perhaps instead of [8], but both references would also be ok.).
 
 REMARQUE: la ref [8] est parfaite à mon sens.
+
+John : c'est quoi les textbooks of Comp Graphics ? La ref 8 concerne déjà du Computer Graphics .... je comprends pas....
 
 
 The English of the paper is not very polished. Here there is a partial list:
@@ -52,4 +56,4 @@ between them, not a comma.
 ­
 -"elements [whose ...] is interesting"
 
-REMARQUE: j'ai pas compris ce qu'il veut là...
+changd en "elements with a specific neighbourhood configuration"

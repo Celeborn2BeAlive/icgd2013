@@ -15,9 +15,11 @@ Abstract, l. 4: used in a new path tracing algorithm
 
 REMARQUE: je suppose qu'il veut qu'on enlève le "new" non ?
 
+peut être... je propose de changer new en modified... qu'en pensez-vous ?
+
 =>CORRIGE: p. 3, l.1: Cartesian
 
-Algorithm 1: for t=1­­>n do
+=>Corrige: Algorithm 1: for t=1­­>n do
 
 =>CORRIGE (cf reviewer1): p. 5 l. ­3: it finds
 
@@ -26,6 +28,7 @@ Algorithm 1: for t=1­­>n do
 in Fig. 3. l. ­1: In the same way
 
 REMARQUE: pas compris ce qu'il veut
+j'ai mis example au pluriel...
 
 =>CORRIGE: p. 9 : at point x; at x
 
@@ -34,3 +37,5 @@ REMARQUE: pas compris ce qu'il veut
 l. ­4: gives the direction  
 
 REMARQUE: pas trouvé
+
+bah moi non plus

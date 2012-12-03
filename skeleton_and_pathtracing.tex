@@ -16,10 +16,10 @@
 \def\OneBall#1{\mathbb{B}^{1}_{#1}}
 \def\MaxOneBall#1{\mathbb{M}\OneBall{#1}}
 
-\def\mydist1{D}
-\def\mydd1{\Omega}
-\def\mydecent{\mathcal{DC}}
-\def\dist1{d}
+\def\mydist1{D_1}
+\def\mydd1{\Omega_1}
+\def\mydecent{\mathcal{DC}_1}
+\def\dist1{d_1}
 \def\Dist1#1{\mydist1(#1)}
 \def\DD1#1{\mydd1(#1)}
 \def\decent#1{\mydecent(#1)}
@@ -51,7 +51,7 @@
 \def\complex#1#2{\subcomplex{#2}{\allfaces{#1}}}
 \def\cell#1{\hat{#1}}
 \def\cellstrict#1{\hat{#1}^*}
-\def\closure#1{#1^-}
+\def\closure#1{\widehat{#1}}
 \def\princ#1{#1^+}
 \def\mydim#1{\dim(#1)}
 \def\type#1{\mbox{\it{}Dir\/}(#1)}
@@ -61,7 +61,7 @@
 \def\inter{\cap}
 \def\union{\cup}
 \def\dinterval#1#2{\{#1,\ldots,#2\}}
-\newcommand{\Compl}[1]{\overline{#1}}
+\newcommand{\Compl}[1]{#1^c}
 \def\finproof{\square}
 \def\Zhalf{\frac{\mathbb{Z}}{2}}
 \newcommand{\Card}[1]{|#1|}
@@ -131,7 +131,7 @@ Then, we expose a new method, based on such skeletons, to enhance the results (s
 In the 3D voxel framework, objects are made of voxels. In the 3D cubical complex framework, objects are made of cubes, squares, lines and vertices. 
 Let $\Z$ be the set of integers, we consider the family of sets $\mathbb{F}^1_0$ and $\mathbb{F}^1_1$, such that $\mathbb{F}^1_0 = \{\{a\} \suchthat a \in \Z\}$ and $\mathbb{F}^1_1 = \{ \{a, a+1\} \suchthat a \in \Z\}$. Any subset $f$ of $\Z^n$ such that $f$ is the Cartesian product of $m$ elements of $\mathbb{F}^1_1$ and $(n-m)$ elements of $\mathbb{F}^1_0$ is called a face or an \myem{$m$-face} of $\Z^n$, $m$ is the dimension of $f$, we write $dim(f)=m$. A $0$-face is called a \myem{vertex}, a $1$-face is an \myem{edge}, a $2$-face is a \myem{square}, and a $3$-face is a \myem{cube}.
 
-We denote by $\allfaces{n}$ the set composed of all faces in $\Z^n$. Given $m \in \dinterval{0}{n}$, we denote by $\subfaces{n}{m}$ the set composed of all $m$-faces in $\Z^n$.
+Given $m \in \dinterval{0}{n}$, we denote by $\subfaces{n}{m}$ the set composed of all $m$-faces in $\Z^n$. We denote by $\allfaces{n}$ the set composed of all $m$-faces in $\Z^n$ : $\allfaces{n} = \bigcup \limits_{m \in [0;n]} \subfaces{n}{m}$.
 Let $f \in \allfaces{n}$. We set $\cell{f} = \{g \in \allfaces{n}\vert g \subseteq f\}$, and $\cellstrict{f} = \cell{f} \setminus \{f\}$. Any element of $\cell{f}$ (resp. $\cellstrict{f}$) is \myem{a face of $f$} (resp. \myem{a proper face of $f$}).
 The \myem{closure} of a set of faces $X$ is the set $\closure{X}=\union\{\cell{f} \vert f \in X\}$.
 
@@ -213,21 +213,21 @@ On a single execution of the main loop of Alg.~\ref{algo::pardircollapse_v0}, on
   be removed, and $\ell \in \Nset$, the number of layers of free faces
   which should be removed from $X$} 
 \KwResult{A cubical complex}
-\lnl{pc:01}\While{there exists free faces in $X \setminus W$ and $\ell > 0$}{
-\lnl{pc:02}  $L=\border{X}^-$\;
-\lnl{pc:03}  \For{$t=0 \rightarrow n-1$}{
-\lnl{pc:04}    \For{$s=0 \rightarrow 1$}{
-\lnl{pc:05}      \For{$d=n \rightarrow 1$}{
-\lnl{pc:06}        $E=\{(f,g)$ free for $X \suchthat g \notin W,$\\
-                      $\;$~~~~~~~$\type{f,g}=t,$ $\orient{f,g}=s,$ $\mydim{f}=d\}$\;
-\lnl{pc:07}        $G=\{(f,g) \in E \suchthat f \in L$ and $g \in L\}$\;
-\lnl{pc:08}        $X=X \setminus G$\;
-                 }
-               }
-             }
-\lnl{pc:09}  $l = l-1$\;
-	   }
-\lnl{pc:10} \Return $X$\;
+\While{there exists free faces in $X \setminus W$ and $\ell > 0$}{  \label{pc:01}
+$L=\closure{\border{X}}$\; \label{pc:02}  
+\For{$t=1 \rightarrow n$}{ \label{pc:03}  
+\For{$s=0 \rightarrow 1$}{ \label{pc:04}  
+\For{$d=n \rightarrow 1$}{ \label{pc:05}
+$E=\{(f,g)$ free for $X \suchthat g \notin W,$
+                      $\type{f,g}=t,$ $\orient{f,g}=s,$ $\mydim{f}=d\}$\;  \label{pc:06}       
+$G=\{(f,g) \in E \suchthat f \in L$ and $g \in L\}$\; \label{pc:07}  
+$X=X \setminus G$\;  \label{pc:08}
+}
+}
+}
+$l = l-1$\; \label{pc:10}
+}
+\Return $X$\; \label{pc:11}
 \end{algorithm}
 
 \begin{figure}[bth]
@@ -255,26 +255,26 @@ Generally, two strategies are possible to achieve this goal: find, during the sk
 
 Algorithm~\ref{algo::pardircollapse_v0} does not necessarily preserve geometrical features of the input object in the resulting skeleton, which end up being a single vertex.
 
-In the following, we introduce a new method in the cubical complex framework, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory geometrical properties. Our method is based on the two previously listed strategies: it finds, during thinning, elements whose neighbourhood configuration is interesting, and uses a function on these elements to decide whether to preserve them, or not, in the result.
+In the following, we introduce a new method in the cubical complex framework, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory geometrical properties. Our method is based on the two previously listed strategies: it finds, during thinning, elements with a specific neighbourhood configuration, and uses a function on these elements to decide whether to preserve them, or not, in the result.
 
 \subsection{The lifespan of a face}
 In the following, we define additional functions in the cubical complex, related to the thinning process (Alg.~\ref{algo::pardircollapse_v0}), which are essential for the filtering step of the skeletonization. The first one we present is the \myem{death date} of a face.
 
 \begin{definition}
-Let $f \in \complex{n}{X}$, the \myem{death date of $f$ in $X$}, denoted by $\death{f}{X}$, is the smallest integer $d$ such that $f \notin ParDirCollapse(X, \emptyset, d)$. 
+Let $f \in \complex{n}{X}$. The \myem{death date of $f$ in $X$}, denoted by $\death{f}{X}$, is the smallest integer $\delta$ such that $f \notin ParDirCollapse(X, \emptyset, \delta)$. 
 \end{definition}
 
 Intuitively, the death date of a face indicates how many layers of free faces should be removed from a complex $X$, using Alg.~\ref{algo::pardircollapse_v0}, before removing completely the face from $X$. We now define the \myem{birth date} of a face:
 
 \begin{definition}
-Let $f \in \complex{n}{X}$, the \myem{birth date of $f$ in $X$}, denoted by $\birth{f}{X}$, is the smallest integer $b$ such that either $f$ is a facet of $ParDirCollapse(X, \emptyset, b)$, or $f \notin ParDirCollapse(X, \emptyset, b)$.
+Let $f \in \complex{n}{X}$. The \myem{birth date of $f$ in $X$}, denoted by $\birth{f}{X}$, is the smallest integer $b$ such that either $f$ is a facet of $ParDirCollapse(X, \emptyset, b)$, or $f \notin ParDirCollapse(X, \emptyset, b)$.
 \end{definition}
 
 The birth date indicates how many layers of free faces must be removed from $X$ with Alg.\ref{algo::pardircollapse_v0} before transforming $f$ into a facet of $X$ (we consider that a face \quotes{lives} when it is a facet).
 Finally, we define the \myem{lifespan} of a face :
 
 \begin{definition}
-Let $f \in \complex{n}{X}$, the lifespan of $f$ in $X$ is the integer 
+Let $f \in \complex{n}{X}$. The lifespan of $f$ in $X$ is the integer 
 
 \begin{math}
 \lifespan{f}{X} = \left\{
@@ -296,11 +296,13 @@ The lifespan of a face $f$ of $X$ indicates how many \quotes{rounds} this face \
 \label{subsec::distmap}
 In addition to the lifespan of a face, the proposed homotopic thinning method uses information on distance between faces in order to decide if a face should be kept safe from deletion. We define hereafter various notions based on distances in the voxel framework.
 
-Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal or inferior to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. 
+%Two points $x,y \in \Zset^n$ are \myem{$1$-neighbours} if the Euclidean distance between $x$ and $y$ is equal to $1$ (also called direct neighbours). A \myem{$1$-path from $x$ to $y$} is a sequence $\mathcal{C}=(z_0,...,z_k)$ of points of $\Zset^n$ such that $z_0=x$, $z_k=y$, and for all $j \in [1;k]$, $z_j$ and $z_{j-1}$ are $1$-neighbours. The length of $\mathcal{C}$ is $k$. 
 
-We set $\dist1(x,y)$ as the length of a shortest $1$-path from $x$ to $y$; remark that $\dist1$ is indeed the $6$-distance in the 3D voxel framework. Let $S \subset \Zset^n$, we set $\Compl{S} = \Zset^n \setminus S$, and for all $x \in \Zset^n$, the map $\Dist1{S}: \Zset^n \rightarrow \Nset$ is such that $\Dist1{S}(x) = \displaystyle \min_{y \in \Compl{S}} \dist1(x,y)$. 
+%We set $\dist1(x,y)$ as the length of a shortest $1$-path from $x$ to $y$; remark that $\dist1$ is indeed the $6$-distance in the 3D voxel framework. 
 
-The \myem{maximal $1$-ball of $S$ centered on $x$} is the set $\MaxOneBall{S}(x)=\{y \in \Zset^n | \dist1(x,y) < \Dist1{S}(x)\}$.
+We set $\dist1(x,y)$ as the L1 distance between $x$ and $y$ (Manhattan distance). Let $S \subset \Zset^n$, we set $\Compl{S} = \Zset^n \setminus S$, and for all $x \in \Zset^n$, the map $\Dist1{S}: \Zset^n \rightarrow \Nset$ is such that $\Dist1{S}(x) = \displaystyle \min_{y \in \Compl{S}} \dist1(x,y)$. 
+
+The \myem{maximal $1$-ball in $S$ centered on $x$} is the set $\MaxOneBall{S}(x)=\{y \in \Zset^n | \dist1(x,y) < \Dist1{S}(x)\}$.
 We set, for all $x \in S$, the map $\DD1{S}: \Zset^n \rightarrow \Nset$ such that $\DD1{S}(x) = \displaystyle \max_{x \in \MaxOneBall{S}(y)} \Dist1{S}(y)$: this value indicates the radius of a largest maximal $1$-ball contained in $S$ and containing $x$. If $x \in \Compl{S}$, we set $\DD1{S}(x) = 0$. The map $\DD1{S}$ is known as the opening function of $S$ based on the $1$-distance (also called the granulometry function) \cite{Matheron67}: it allows to compute efficiently results of morphological openings by balls of various radius, and gives information on the local thickness of an object.
 
 Given $S \subset \Zset^n$, the value of $\DD1{S}(x)$ of every $x \in S$ can be naively computed by performing successive morphological dilations of values of the map $\Dist1{S}$. A linear algorithm for computing the map $\DD1{S}$ (with regard to the size of the input image) was proposed in \cite{Chaussard_phd}, and will be explored further in details in a future paper.
@@ -340,7 +342,7 @@ In the same way, we define $\cplDD1{Y}$ and $\cpldecent{Y}$.
 	\myincludegraphics{0.22\textwidth}{fishdd.pdf} &
 	\myincludegraphics{0.22\textwidth}{fishcenter.pdf} \\
 \end{tabular}
-\caption[Example of opening and decenterness map]{\label{fig::globalopening} \textbf{Example of opening and decenterness map - } From left to right: a shape $S \subset \Zset^2$ (in gray), $\Dist1{S}$, $\DD1{S}$ and $\decent{S}$ (low values have dark colour).}
+\caption[Examples of opening and decenterness map]{\label{fig::globalopening} \textbf{Examples of opening and decenterness map - } From left to right: a shape $S \subset \Zset^2$ (in gray), $\Dist1{S}$, $\DD1{S}$ and $\decent{S}$ (low values have dark colour).}
 \end{center}
 \end{figure}
 
@@ -356,12 +358,13 @@ We can identify surfacic areas of a complex as zones where squares have a high l
 \caption[CurvilinearSkeleton]{$CurvilinearSkeleton(X)$}
 \KwData{A cubical complex $\complex{3}{X}$}
 \KwResult{A cubical complex $\complex{3}{Y}$}
-\lnl{curvskel:01} $W=\{f \in X | \lifespan{f}{X} > \cpldecent{X}(f) + \birth{f}{X} - \cplDist1{X}(f)$ and $\mydim{f}=1\}$\;
+$W=\{f \in X | \lifespan{f}{X} > \cpldecent{X}(f) + \birth{f}{X} - \cplDist1{X}(f)$ and $\mydim{f}=1\}$  \label{curvskel:01}  \; 
 \Return $ParDirCollapse(X,W,+\infty)$\;
 \end{algorithm}
 
 In order to understand what was realised on line \ref{curvskel:01} of Alg.~\ref{algo::3d_curvskel}, we might point out that the birth date of an edge corresponds to the highest death date of the squares containing this edge. Moreover, the map $\cplDist1{X}$ gives, for all 3-faces of $X$, their death date (as the thinning algorithm naturally follows this map to eliminate cubes from a 3-complex). Therefore, for an edge $f$ of $X$, $\cplDist1{X}(f)$ informs us on the highest death date of cubes containing $f$, also equal to the highest birth date of squares containing $f$. In conclusion, $\birth{f}{X} - \cplDist1{X}(f)$ is an approximation of the lifespan of the squares containing $f$.
 
+Although the output of Alg.\ref{algo::3d_curvskel} may contain $2$-faces (depending on the topological properties of the input), the algorithm is said to be a \myem{curvilinear skeletonization} algorithm because it only adds $1$-faces (edges) in the inhibitor set $W$ (used for the visual aspect preservation step) (on line \ref{curvskel:01} of Alg.~\ref{algo::3d_curvskel}). For the same reason, we say that the output of Alg.~\ref{algo::3d_curvskel} is a \myem{curvilinear skeleton}.
 
 \subsection{Results}
 

@@ -1,0 +1,137 @@
+\documentclass[final,envcountsame]{article}
+
+\usepackage[margin=1.2in]{geometry}
+
+
+\begin{document}
+
+
+\title{Answers to the reviewers}
+\author{John Chaussard \and Laurent No\"{e}l \and Venceslas Biri \and Michel Couprie}
+\maketitle
+
+We would like to thank the reviewers for their time and for all the constructive feedback they provided us.
+
+\section{Answer to reviewer 1}
+
+\begin{itemize}
+
+
+\item p. 3, §2: I do not know if the notation $X^{­}$ is often used but I feel this may be a bad choice: suggesting that maybe a $X^{+}$ also exists.. Why not use $\widehat{X}$ which will easily recall the corresponding $\hat{f}$ notation? 
+
+\textit{Done. We also changed the sign for the complement, which was $\overline{X}$, to $X^c$, in order to make sure the reader will not mistake the overline symbol with the widehat.} \\
+
+
+\item p. 5 and 8: why did you numbered the first line of each algorithm "2" instead of "1"?! 
+
+\textit{This was not made on purpose, and was due to the deprecated \textbackslash lnl tag used to label lines in the algorithm in order to refer to them later. Using \textbackslash label tag instead solved the problem.} \\ 
+
+
+\item p. 6, section 4.2, §2: I was not able to figure how two *different* points in $Z^n$ may have an Euclidean distance strictly lower than 1. Did you meant "is equal to 1" instead of "is equal or inferior to 1"? (I assume this was only because the common sentence is "is equal of inferior to a distance $n>1$") 
+
+\textit{This was made in order to include the point itself in the set of its direct neighbours. As this is unnecessary, we changed the definition of 1-neighbours to points having an euclidean distance equal to 1. However, we finally decided to remove this part and directly refer to $L_1$ distance, as reviewer 2 suggested.} \\
+
+
+\item p. 7, end of the same sentence: ".. the radius of the largest maximal 1­ball contained in $S$ and containing $x$.": I see no reason for this maximal ball to be unique. The maximal radius is obviously unique, but many equivalent maximal balls of this radius may cover $x$, isn't it? 
+
+\textit{This is right, and it has been corrected in the new version.} \\
+
+
+\item \begin{itemize}
+\item p. 1, in the abstract, "These skeletons are used * a new path tracing": I suppose "in" is missing here. 
+\item p. 1, §2, "To avoid the noise resulting..". I suggest to replace "avoid" by "reduce" since, as far as I know, nobody knows a magical method enabling to avoid any error in such a context! 
+\item p. 1, §3, "If a ray.. its contribution is * null.": I suggest "is considered null" or "is set to null" since this is not physically correct but practically mandatory. 
+\item p. 2, section 2 and further: I would spell "3d" as "3D". 
+\item p. 3, §2: I would have defined $F^n_m$ first and $F^n$ just after as the union of $F^n_m$ for all $m$. Defining $F^n$ as "the set of all faces" (without specifically spelling it as "m­faces") may confuse the reader and let him believe that only 2­faces (what is most of the time named "faces") are concerned. 
+\item p. 3, §6, "To transpose such *an* image *$S$* to the cubical complex.." 
+\item p. 5, last §, "two previously listed strategies: *it* finds": "it" instead of "its". 
+\item p. 5, same sentence: "..to decide *whether* to preserve them, or not, in the result." 
+\item p. 7, §1: The maximal 1­ball *of* $S$..": I suggest to replace "of" by "in". 
+\end{itemize}
+
+\textit{Done.} \\
+
+
+\end{itemize}
+
+
+\section{Answer to reviewer 2}
+
+\begin{itemize}
+
+\item The discussion in Section 5.2 assumes some things. For example, if there are different sources of light and the image is quite symmetric, it may easily happen that $imp_n=n$. In this case the discussion does not go through.
+Also, I get the feeling that the presentation is tailored to ONE light source. It would be better to make clear in the discussion that the method works for several light­sources.
+
+\textit{If there are multiple light sources in the scene, the one closest to $n$ is chosen in order to computer $imp_n$, therefore, we cannot have both points equal. If $n$ is equidistant to two light sources, then (in the current algorithm's version), we choose randomly one light source.
+We added the strategy about multiple light sources at the end of section 5.2, just before the "sampling according to L" paragraph.}
+
+
+\item In the experiments, there is a significant speed up in most cases, but in Sponza 2. Is there any explanation for this difference in the behavior of the speed up?
+
+\textit{For Sponza 2, some speckles appear in the resulting image. Because of these "extreme pixels", our algorithm takes more time to get close enough to the required MSE. We are currently investigating the source of these speckles, and how to reduce them. Unfortunately, the page restriction set for the DGCI article does not allow us to discuss this matter in the paper.}\\
+
+
+\item Why do not define d(x,y) as the $L_1$ ­distance instead of using a graph­based distance?
+
+\textit{We changed the way we introduce, in section 4.2, the distance d, and now rely on the well-known definition of the L1 distance}.\\
+
+
+\item Why do you call the skeleton curvilinear? What is curvilinear about it?
+
+\textit{The skeleton is called curvilinear because the skeletonization algorithm preserves, in the visual aspect preservation step, only edges. Surfaces may appear if the topology of the object requires it : in this case, these surfaces were not preserved for geometrical reasons, but for topological reasons. Surfacic skeletons also exist : in this case, surfaces may be preserved during the visual aspect preservation step. Our algorithm is a curvilinear skeletonization algorithm.
+We explained why this terminology choice in the article, at the end of section 4.3.}\\
+
+
+\item Do not use $d$ in definition 7 because $d$ is already used in the Algorithm. (It is confusing.)
+
+\textit{Done. We use delta instead.}\\
+
+
+\item I do not understand the 3rd paragraph of Section 4.
+
+\textit{The skeleton obtained using Alg. 1 could end up being too much reduced, as Alg. 1 does not preserve the visual aspect of the object during thinning. For example, the skeleton of a corridor could end up being reduced to a single vertex. We changed this part in order to make this point clearer.}\\
+
+
+\item The path­tracing algorithm is quite standard and I assume that it appears in textbooks of Comp Graphics. I would suggest referring to one such book (perhaps instead of [8], but both references would also be ok.).
+
+\textit{We keep reference [8] as it is widely used articles about path tracing. Although another reference, such as the one suggested, would be very interesting, the page limitation do not allow us to add a single reference.}
+
+
+\item \begin{itemize}
+
+\item page 3, line 8: ")" is missing.
+\item Def 3: "Let Y..., the complex X collapses....". These are two different sentences and there should be a period between them, not a comma.
+\item "elements [whose ...] is interesting"
+
+\end{itemize}
+
+\textit{Done.}
+
+
+\end{itemize}
+
+
+\section{Answer to reviewer 3}
+
+\begin{itemize}
+
+\item \begin{itemize}
+\item Abstract, l. 4: used in a new path tracing algorithm
+\item p. 3, l.1: Cartesian
+\item Algorithm 1: for $t=1­­>n$ do
+\item p. 5 l. ­3: it finds
+\item p. 7 l. 11: with regard. l.17: example; 
+\item in Fig. 3. l. ­1: In the same way
+\item p. 9 : at point x; at x
+\item p. 10: l. 5 gives. l. 19: don't­­ $>$ do not. l. ­18: preprocessing performed on it. 
+\end{itemize}
+
+\textit{Done.}\\
+
+\end{itemize}
+
+
+\end{document}
+
+
+

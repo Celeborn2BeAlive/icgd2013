@@ -50,9 +50,9 @@
 \def\subcomplex#1#2{#1 \preceq #2}
 \def\complex#1#2{\subcomplex{#2}{\allfaces{#1}}}
 \def\cell#1{\hat{#1}}
-\def\cellstrict#1{\hat{#1}^*}
+\def\cellstrict#1{\cell{#1}^*}
 \def\closure#1{\widehat{#1}}
-\def\princ#1{#1^+}
+\def\princ#1{\check{#1}}
 \def\mydim#1{\dim(#1)}
 \def\type#1{\mbox{\it{}Dir\/}(#1)}
 \def\orient#1{\mbox{\it{}Orient\/}(#1)}
@@ -88,7 +88,7 @@ Universit\'{e} Paris Est, LIGM, A3SI-ESIEE \\ 2, boulevard Blaise Pascal, 93162 
 
 
 \begin{abstract}
-We present a novel 3D curvilinear skeletonization algorithm which produces filtered skeletons without needing any user input, thanks to a new parallel algorithm based on the cubical complex framework. These skeletons are used in a new path tracing algorithm in order to produce less noisy images in less time than the classical approach.
+We present a novel 3D curvilinear skeletonization algorithm which produces filtered skeletons without needing any user input, thanks to a new parallel algorithm based on the cubical complex framework. These skeletons are used in a modified path tracing algorithm in order to produce less noisy images in less time than the classical approach.
 \end{abstract}
 
 
@@ -253,9 +253,7 @@ As previously said, our goal is to use the skeleton of the voids of a scene in o
 
 Generally, two strategies are possible to achieve this goal: find, during the skeletonization process, points whose neighbourhood configuration seems interesting and keep them in the result \cite{CouCoeurZrour07} \cite{HR08} \cite{CCT09ext}, or choose, before skeletonization, interesting points of the object which should remain untouched, based on a function on these points and a filtering parameter \cite{BertrandCouprie06} \cite{Pal07}. 
 
-Algorithm~\ref{algo::pardircollapse_v0} does not necessarily preserve geometrical features of the input object in the resulting skeleton, which end up being a single vertex.
-
-In the following, we introduce a new method in the cubical complex framework, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory geometrical properties. Our method is based on the two previously listed strategies: it finds, during thinning, elements with a specific neighbourhood configuration, and uses a function on these elements to decide whether to preserve them, or not, in the result.
+Algorithm~\ref{algo::pardircollapse_v0} does not necessarily preserve geometrical features of the input object in the resulting skeleton (for example, the skeleton of a corridor could be reduced to a single vertex). In the following, we introduce a new method in the cubical complex framework, requiring no user input, for obtaining a curvilinear skeleton yielding satisfactory geometrical properties. Our method is based on the two previously listed strategies: it finds, during thinning, elements with a specific neighbourhood configuration, and uses a function on these elements to decide whether to preserve them, or not, in the result.
 
 \subsection{The lifespan of a face}
 In the following, we define additional functions in the cubical complex, related to the thinning process (Alg.~\ref{algo::pardircollapse_v0}), which are essential for the filtering step of the skeletonization. The first one we present is the \myem{death date} of a face.
@@ -365,7 +363,7 @@ $W=\{f \in X | \lifespan{f}{X} > \cpldecent{X}(f) + \birth{f}{X} - \cplDist1{X}(
 In order to understand what was realised on line \ref{curvskel:01} of Alg.~\ref{algo::3d_curvskel}, we might point out that the birth date of an edge corresponds to the highest death date of the squares containing this edge. Moreover, the map $\cplDist1{X}$ gives, for all 3-faces of $X$, their death date (as the thinning algorithm naturally follows this map to eliminate cubes from a 3-complex). Therefore, for an edge $f$ of $X$, $\cplDist1{X}(f)$ informs us on the highest death date of cubes containing $f$, also equal to the highest birth date of squares containing $f$. In conclusion, $\birth{f}{X} - \cplDist1{X}(f)$ is an approximation of the lifespan of the squares containing $f$.
 
 Although the output of Alg.\ref{algo::3d_curvskel} may contain $2$-faces, the algorithm is said to be a \myem{curvilinear skeletonization} algorithm because it only adds $1$-faces (edges) in the inhibitor set $W$ (used for the visual aspect preservation step) (on line \ref{curvskel:01} of Alg.~\ref{algo::3d_curvskel}).
-For the same reason, we say that the output of Alg.~\ref{algo::3d_curvskel} is a \myem{curvilinear skeleton}. In Sec.~\ref{sec::appli_pathtrace}, the outputs of Alg.~\ref{algo::3d_curvskel} were always one dimensional complexes.
+For the same reason, we say that the output of Alg.~\ref{algo::3d_curvskel} is a \myem{curvilinear skeleton}. In the scenes studied in Sec.~\ref{sec::appli_pathtrace}, the outputs of Alg.~\ref{algo::3d_curvskel} were one dimensional complexes.
 
 \subsection{Results}
 
@@ -374,10 +372,10 @@ Algorithm \ref{algo::3d_curvskel} allows to obtain a filtered curvilinear skelet
 \begin{figure}[tb]
 \begin{center}
 \begin{tabular}{cc|cc}
-	\myincludegraphics{0.18\textwidth}{hand2.jpg} &
-	\myincludegraphics{0.18\textwidth}{hand_curvskel.jpg} &
-	\myincludegraphics{0.24\textwidth}{neptune.jpg} &
-	\myincludegraphics{0.24\textwidth}{neptune_curvskel.jpg} \\
+	\myincludegraphics{0.16\textwidth}{hand2.jpg} &
+	\myincludegraphics{0.16\textwidth}{hand_curvskel.jpg} &
+	\myincludegraphics{0.21\textwidth}{neptune.jpg} &
+	\myincludegraphics{0.21\textwidth}{neptune_curvskel.jpg} \\
 \end{tabular}
 \caption[Results of algorithm \ref{algo::3d_curvskel}]{\label{fig::result_skel} \textbf{Results of algorithm \ref{algo::3d_curvskel}} for two shapes: a hand (left) and a statue (right). In each pair, the rightmost image represents the skeleton.}
 \end{center}

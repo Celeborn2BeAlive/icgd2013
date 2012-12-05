@@ -61,7 +61,7 @@ The previous equation expresses an intuitive idea: the reflected radiance from $
 The function $p$ is a probability density function (pdf) that is used to sample $\Phi$. This estimator is unbiased, meaning that the expected value $E[\langle L_r(x \rightarrow \Theta) \rangle]$ is equal to $L_r(x \rightarrow \Theta)$. The variance of the estimator expresses its quality and depends on the chosen pdf $p$. The best choice is a pdf that matches the shape of the function to integrate (ie. gives high density to samples that have high values for the function and low density to samples that have low values).
 The strategy of choosing an adapted pdf is called \myem{importance sampling}~\cite{Ka86} and is used in global illumination to improve the convergence speed of the algorithms.
 
-The algorithm computes $L$ as follow: it chooses one random direction $\Phi$ based on the pdf $p$ and applies the estimator by calling $L$ recursively to compute $L_r$ (shoots a new ray in the direction $\Phi$, computes the new hit point with the scene, and compute the new radiance at this point). Finally, it returns the sum of the emitted radiance $L_e$ and the result for $L_r$. The recursion stops when either a maximal number of bounces or a directly illuminated area have been reached.
+The algorithm computes $L$ as follow: it chooses one random direction $\Phi$ based on the pdf $p$ and applies the estimator by calling $L$ recursively to compute $L_r$ (shoots a new ray in the direction $\Phi$, computes the new hit point with the scene, and computes the new radiance at this point). Finally, it returns the sum of the emitted radiance $L_e$ and the result for $L_r$. The recursion stops when either a maximal number of bounces or a directly illuminated area have been reached.
 
 This computation is done multiple times for each pixel. We average the results and get an estimation of the mean radiance passing through the pixel and heading towards the camera.
 A bad pdf would lead in picking directions that do not reach the light before the end of the recursion, and produce results with a lot of noise in the final image. In the next part, we explain how to produce a pdf based on the curvilinear skeleton.
@@ -81,7 +81,7 @@ The term $L$, representing the distribution of light in the scene, is unknown. O
 
 \subsubsection{Construction of the importance points}
 
-The skeleton of the voids of the scene is computed using Alg.~\ref{algo::3d_curvskel} (as shown on Fig.~\ref{fig::example_imp} on the right) and is converted to a graph (the nodes are the 0-faces and the edges are the 1-faces). We then compute a set of \myem{importance points}, which will be used to sample $\Omega_x$ in the path tracing algorithm. To each node $n$ of the skeleton, one importance point $imp_n$ is computed. Intuitively, the importance point associated to $n$ is the direction to follow in order to find a light source.
+The skeleton of the voids of the scene is computed using Alg.~\ref{algo::3d_curvskel} (as shown on Fig.~\ref{fig::example_imp} on the right) and is converted into a graph (the nodes are the 0-faces and the edges are the 1-faces). We then compute a set of \myem{importance points}, which will be used to sample $\Omega_x$ in the path tracing algorithm. To each node $n$ of the skeleton, one importance point $imp_n$ is computed. Intuitively, the importance point associated to $n$ is the direction to follow in order to find a light source.
 
 %La, pas clair !!!
 Let $L$ be the light source of the scene and $n_L$ the nearest node of the skeleton that is visible by $L$. For each node, we compute the shortest path to $n_L$ along the skeleton. To do so, we use the Dijkstra algorithm and weight the edges of the skeleton depending on a visibility criteria: the weight of an edge $e$ is $1$ if $e$ is visible from $n_L$ and $10$ else. It results that illuminated paths will be shorter than paths located in dark areas.
@@ -94,7 +94,7 @@ The algorithm can be extended to multiple light sources by taking into account, 
 
 \subsubsection{Sampling according to $L$}
 
-Given a point $x$ on the scene and a direction $\Theta$, we want to compute $L(x \rightarrow \Theta)$ and then sample the hemisphere $\Omega_x$. We search for the nearest skeleton node $n$ to $x$ and its importance point $imp_n$. We sample the hemisphere with a power-cosine pdf centered on $\overrightarrow{x\,imp_n}$:
+Given a point $x$ on the scene and a direction $\Theta$, we want to compute $L(x \rightarrow \Theta)$ and then sample the hemisphere $\Omega_x$. We look for the nearest skeleton node $n$ to $x$ and its importance point $imp_n$. We sample the hemisphere with a power-cosine pdf centered on $\overrightarrow{x\,imp_n}$:
 \begin{center}
 $p_{skel}(\Phi) = \frac{s + 1}{2\pi}  * cos^s \alpha$
 \end{center}
@@ -102,7 +102,7 @@ with $\alpha$ the angle between $\overrightarrow{x\,imp_n}$ and $\Phi$, $s$ bein
 
 
 \subsection{Results and discussion}
-Some results are presented on Fig.~\ref{fig:results} and Fig.~\ref{fig::intro_image} where we can see that our method produces less noisy images compared to the regular path tracing. We present, in Fig~\ref{tab:timing}, the time taken by each method to produce an image of same quality (the quality is measured by the mean square error (MSE) with a reference image) in different scenes: our method is the fastest.
+Some results are presented on Fig.~\ref{fig:results} and Fig.~\ref{fig::intro_image} where we can see that our method produces less noisy images compared to the regular path tracing. We present, in Fig~\ref{tab:timing}, the time taken by each method to produce an image of same quality (the quality is measured by the mean square error (MSE) with a reference image) in different scenes: our method is the fastest one.
 
 
 

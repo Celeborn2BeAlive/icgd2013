@@ -62,7 +62,7 @@ We would like to thank the reviewers for their time and for all the constructive
 \item The discussion in Section 5.2 assumes some things. For example, if there are different sources of light and the image is quite symmetric, it may easily happen that $imp_n=n$. In this case the discussion does not go through.
 Also, I get the feeling that the presentation is tailored to ONE light source. It would be better to make clear in the discussion that the method works for several light­sources.
 
-\textit{If there are multiple light sources in the scene, the one closest to $n$ is chosen in order to computer $imp_n$, therefore, we cannot have both points equal. If $n$ is equidistant to two light sources, then (in the current algorithm's version), we choose randomly one light source.
+\textit{If there are multiple light sources in the scene, the one closest to $n$ is chosen in order to compute $imp_n$, therefore, we cannot have both points equal. If $n$ is equidistant from two light sources, then (in the current algorithm's version), we choose randomly one light source.
 We added the strategy about multiple light sources at the end of section 5.2, just before the "sampling according to L" paragraph.}
 
 
@@ -78,8 +78,8 @@ We added the strategy about multiple light sources at the end of section 5.2, ju
 
 \item Why do you call the skeleton curvilinear? What is curvilinear about it?
 
-\textit{The skeleton is called curvilinear because the skeletonization algorithm preserves, in the visual aspect preservation step, only edges. Surfaces may appear if the topology of the object requires it : in this case, these surfaces were not preserved for geometrical reasons, but for topological reasons. Surfacic skeletons also exist : in this case, surfaces may be preserved during the visual aspect preservation step. Our algorithm is a curvilinear skeletonization algorithm.
-We explained why this terminology choice in the article, at the end of section 4.3.}\\
+\textit{The skeleton is called curvilinear because the skeletonization algorithm preserves, in the visual aspect preservation step, only edges. Surfaces may appear if the topology of the object requires it : in this case, these surfaces were not preserved for geometrical reasons, but for topological reasons. Surface skeletons also exist : in this case, surfaces may be preserved during the visual aspect preservation step. Our algorithm is a curvilinear skeletonization algorithm.
+We explained this terminology choice in the article, at the end of section 4.3.}\\
 
 
 \item Do not use $d$ in definition 7 because $d$ is already used in the Algorithm. (It is confusing.)

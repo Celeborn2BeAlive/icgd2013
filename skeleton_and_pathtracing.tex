@@ -78,10 +78,13 @@
 \mainmatter
 
 \title{A 3D curvilinear skeletonization algorithm with application to path tracing}
-\author{John Chaussard\inst{1} \and Laurent No\"{e}l\inst{2} \and Venceslas Biri\inst{2} \and Michel Couprie\inst{2}\thanks{This work has been partially supported by the \quotes{ANR-2010-BLAN-0205 KIDICO} project}}
+\author{John Chaussard\inst{1} \and Laurent No\"{e}l\inst{2} \and Venceslas Biri\inst{2} \and Michel Couprie\inst{3}\thanks{This work has been partially supported by the \quotes{ANR-2010-BLAN-0205 KIDICO} project}}
 \institute{Universit\'{e} Paris 13, Sorbonne Paris Cit\'{e}, LAGA, CNRS(UMR 7539), \\ F-93430, Villetaneuse, France \\ \email{chaussard@math.univ-paris13.fr}
 \and
-Universit\'{e} Paris Est, LIGM, A3SI-ESIEE, CNRS(UMR 8049) \\ 2, boulevard Blaise Pascal, 93162 Noisy le Grand CEDEX, France \\ \email{laurent.noel@esiee.fr, v.biri@esiee.fr, michel.couprie@esiee.fr}}
+Universit\'{e} Paris Est, LIGM, CNRS(UMR 8049) \\ Cit\'{e} Descartes, 5 boulevard Descartes, 77454 Marne-la-Vallée CEDEX 22, France \\ \email{laurent.noel@esiee.fr, v.biri@esiee.fr}
+\and
+Universit\'{e} Paris Est, LIGM, A3SI-ESIEE, CNRS(UMR 8049) \\ 2, boulevard Blaise Pascal, 93162 Noisy le Grand CEDEX, France \\ \email{michel.couprie@esiee.fr}
+}
 
 
 \maketitle
@@ -148,7 +151,7 @@ A face $f \in X$ is \myem{a facet of $X$} if $f$ is not a proper face of any fac
 
 Traditionally, a binary image is a finite subset of $\Zset^n$ (called voxel image when $n=3$). To transpose such an image $S$ to the cubical complex framework, we associate to each element of $S\subseteq \Zset^n$ an n-face of $\allfaces{n}$. Let $x=(x_1,...,x_n) \in S$, we define the n-face $\V2C(x) = \{x_1, x_1 + 1\} \times \ldots \times \{x_n, x_n + 1\}$. We can extend the map $\V2C$ to sets: $\V2C(S)=\{\V2C(x) | x \in S\}$. Given a set $S \subset \Zset^n$, we associate to it the cubical complex $\closure{\V2C(S)}$.
 
-The collapse operation is the basic operation for performing homotopic thinning of a complex, and consists of removing two distinct faces $(f,g)$ from a complex $X$ under the condition that they form a free pair:
+The collapse operation is the basic operation for performing homotopic thinning of a complex, and consists of removing free pairs of faces:
 
 \begin{definition}
 Let $\complex{n}{X}$, and let $f,g$ be two faces of $X$. The face $g$ is \myem{free for $X$}, and the pair $(f,g)$ is \myem{a free pair for $X$} if $f$ is the only face of $X$ which strictly contains $g$. 
@@ -372,8 +375,8 @@ Algorithm \ref{algo::3d_curvskel} allows to obtain a filtered curvilinear skelet
 \begin{figure}[tb]
 \begin{center}
 \begin{tabular}{cc|cc}
-	\myincludegraphics{0.16\textwidth}{hand2.jpg} &
-	\myincludegraphics{0.16\textwidth}{hand_curvskel.jpg} &
+	\myincludegraphics{0.20\textwidth}{hand2.jpg} &
+	\myincludegraphics{0.20\textwidth}{hand_curvskel.jpg} &
 	\myincludegraphics{0.21\textwidth}{neptune.jpg} &
 	\myincludegraphics{0.21\textwidth}{neptune_curvskel.jpg} \\
 \end{tabular}
